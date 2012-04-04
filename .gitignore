@@ -1,0 +1,4 @@
+# Files to ignore in git
+*~
+build/*
+bin/*
