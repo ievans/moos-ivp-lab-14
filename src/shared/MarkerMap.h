@@ -4,38 +4,34 @@
 /*    FILE: MarkerMap.h                                     */
 /*    DATE: April 5, 2012                                   */
 /************************************************************/
-
-#include "MOOSLib.h"
-#include "MBUtils.h"
-#include <stdlib.h>
-#include "XYHazardSet.h"
-#include <math.h>
+#ifndef MARKERMAP_HEADER
+#define MARKERMAP_HEADER
 
 #include "UUO.h"
 
-using namespace std;
-
 class MarkerMap {
 public:
-   map<int, Uuo> _mines;
-   map<int, Uuo> _mines_other;
+    std::map<int, Uuo> _mines;
+    std::map<int, Uuo> _mines_other;
 
-   MarkerMap() {
+    MarkerMap() {
 
-   };
+    };
 
-   MarkerMap(string encodedMM) { this->fromString(encodedMM); };
+    MarkerMap(string encodedMM) { this->fromString(encodedMM); };
 
-   string toString() {
+    string toString() {
 // TODO
-   };
+    };
    
-   void fromString(string encodedMM) {
+    void fromString(string encodedMM) {
 // TODO
-   };
+    };
 
-   void fuseFromString(string encodedMM) {
+    void fuseFromString(string encodedMM) {
 // TODO
-   };
+    };
 
-}
+};
+
+#endif

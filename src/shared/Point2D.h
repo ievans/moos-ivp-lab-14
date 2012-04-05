@@ -1,3 +1,6 @@
+#ifndef POINT2D_HEADER
+#define POINT2D_HEADER
+
 #include "MOOSLib.h"
 #include "MBUtils.h"
 #include <iterator>
@@ -31,3 +34,5 @@ public:
 	y  = atof(svector[2].c_str());
     }
 };
+
+#endif

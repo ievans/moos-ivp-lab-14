@@ -15,10 +15,8 @@
 #include <math.h>
 #include <queue>
 
-#include "../shared/UUO.h"
 #include "../shared/MarkerMap.h"
-
-using namespace std;
+#include "../shared/UUO.h"
 
 class HandleSensorData : public CMOOSApp
 {
@@ -64,7 +62,7 @@ private:
    double _Pc;   // prob classification
    int _width;   // swath width
 
-   priority_queue<Uuo> classifyQueue;
+   std::priority_queue<Uuo> classifyQueue;
 };
 
 #endif 

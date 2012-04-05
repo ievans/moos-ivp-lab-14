@@ -1,3 +1,6 @@
+#ifndef ORDER_HEADER
+#define ORDER_HEADER
+
 #include "MOOSLib.h"
 #include "MBUtils.h"
 #include <iterator>
@@ -28,3 +31,5 @@ public:
     string newBehavior;
     BehaviorOrder(string behaviorString) { newBehavior = behaviorString; }
 };
+
+#endif

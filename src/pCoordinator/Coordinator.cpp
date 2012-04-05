@@ -28,32 +28,44 @@ Coordinator::~Coordinator()
 }
 
 vector<Uuo> getNMostValuableUuos(int n) {
-    return null; // TODO
+    vector<Uuo> topN;
+    return topN;
 }
 
 void Coordinator::stateTransition(GameState newState) {
     if (gameState == INITIAL && newState == ALL_LAWNMOW) {
 	BehaviorOrder lawnmow = BehaviorOrder("lawnmower");
-	sendOrdersToMaster(lawnmow);
-	sendOrdersToSlaves(lawnmow);
+	vector<Order> orders;
+	orders.push_back(lawnmow);
+	sendOrdersToMaster(orders);
+	sendOrdersToSlaves(orders);
     } else if (gameState == ALL_LAWNMOW && newState == LAWNMOW_AND_INSPECT) {
 	// keep the master in lawmow mode
 	BehaviorOrder lawnmow = BehaviorOrder("lawnmower");
-	sendOrdersToMaster(lawnmow);
+	vector<Order> orders;
+	orders.push_back(lawnmow);
+	sendOrdersToMaster(orders);
 	// generate waypoint behaviors for the slave
-	WaypointOrder wp = WaypointOrder();
+	WaypointOrder wp = WaypointOrder(Point2D(0, 0));
 	
-	sendOrdersToSlaves(wp);
+	vector<Order> slaveOrders;
+	orders.push_back(wp);
+
+	sendOrdersToSlaves(slaveOrders);
     }
 
     gameState == newState;
 }
 
 void Coordinator::sendOrdersToMaster(vector<Order> orders) {
-    m_Comms.Notify("MASTER_ORDER", orders.toString());
+    for (int i = 0; i < orders.size(); i++) {
+	m_Comms.Notify("MASTER_ORDER", orders[i].toString());
+    }
 }
 void Coordinator::sendOrdersToSlaves(vector<Order> orders) {
-    m_Comms.Notify("SLAVES_ORDER", orders.toString());
+    for (int i = 0; i < orders.size(); i++) {
+	m_Comms.Notify("SLAVES_ORDER", orders[i].toString());
+    }
 }
 
 //---------------------------------------------------------
