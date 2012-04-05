@@ -20,8 +20,8 @@
 #include "XYHazardSet.h"
 
 // Local data structures
-#include "Point2D.h"
-#include "Order.h"
+#include "../shared/Point2D.h"
+#include "../shared/Order.h"
 
 enum GameState { 
     INITIAL,
