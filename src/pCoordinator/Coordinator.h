@@ -9,6 +9,19 @@
 #define Coordinator_HEADER
 
 #include "MOOSLib.h"
+#include "MBUtils.h"
+#include <iterator>
+#include <iostream>
+#include <string>
+
+// Add "geometry" to src/pHandleSensorData/CMakeLists.txt
+#include "GeomUtils.h"
+#include "XYSegList.h"
+#include "XYHazardSet.h"
+
+// Local data structures
+#include "Point2D.h"
+#include "Order.h"
 
 class Coordinator : public CMOOSApp
 {
