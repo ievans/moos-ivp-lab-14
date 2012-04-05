@@ -81,8 +81,8 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 // We will always have this in our database already for
 	 // a classification:
 	 map<int, Uuo>::iterator it;
-	 it = _mines.find(label);
-	 if (it == _mines.end()) {
+	 it = _map._mines.find(label);
+	 if (it == _map._mines.end()) {
 	   cout << "ERROR!  classification uuo not found!" << endl;
 	 }
 
@@ -155,11 +155,11 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 newMine.id = label;
 	 map<int, Uuo>::iterator it;
 
-	 it = _mines.find(label);
-	 if (it == _mines.end()) {
+	 it = _map._mines.find(label);
+	 if (it == _map._mines.end()) {
 	   // add new sighting to map
 	   newMine.classifyCount = 1;
-	   _mines.insert(pair<int,Uuo>(label,newMine));
+	   _map._mines.insert(pair<int,Uuo>(label,newMine));
 	 }
 	 else {
 	   // do bayesian update
@@ -234,9 +234,9 @@ void HandleSensorData::parseStateMessage(string msg) {
 
     if (newMine.isInitialized()) {
       // integrate new mine
-      it = _mines_other.find(newMine.id);
-      if (it == _mines_other.end()) {
-	_mines_other.insert( pair<int,Uuo>(newMine.id,newMine) );
+      it = _map._mines_other.find(newMine.id);
+      if (it == _map._mines_other.end()) {
+	_map._mines_other.insert( pair<int,Uuo>(newMine.id,newMine) );
       }
       else {
 	it->second = newMine;
@@ -257,7 +257,7 @@ void HandleSensorData::classifyUuos() {
 string HandleSensorData::printUuoList() {
   stringstream out;
   map<int, Uuo>::iterator it;
-  for (it = _mines.begin(); it != _mines.end(); it++) {
+  for (it = _map._mines.begin(); it != _map._mines.end(); it++) {
     out << "Uuo[" << it->second.id <<"] = (" << it->second.x << ","
 	<< it->second.y << ") hazard=" << it->second.isHazard() << endl;
   }
@@ -288,18 +288,18 @@ string HandleSensorData::printStateMessage() {
   stringstream msg;
   map<int, Uuo>::iterator it;
 
-  if (_mines.begin() == _mines.end()) {
+  if (_map._mines.begin() == _map._mines.end()) {
     msg << "NONE";
   }
   else {
-    it = _mines.begin();
+    it = _map._mines.begin();
     msg << "id=" << it->second.id << "," 
 	<< "x=" << it->second.x << "," 
 	<< "y=" << it->second.y << ","
 	<< "pH=" << it->second.probHazard << "," 
 	<< "cc=" << it->second.classifyCount;
 
-    for (it++; it != _mines.end(); it++) {
+    for (it++; it != _map._mines.end(); it++) {
       msg << ":" << "id=" << it->second.id << "," 
 	  << "x=" << it->second.x << "," 
 	  << "y=" << it->second.y << ","
@@ -349,7 +349,7 @@ void HandleSensorData::generateHazardReport() {
   map<int, Uuo>::iterator it;
   XYHazardSet set;
   set.setSource(tolower(_vehicle_name));
-  for (it = _mines.begin(); it != _mines.end(); it++) {
+  for (it = _map._mines.begin(); it != _map._mines.end(); it++) {
     string type;
     if (it->second.isHazard()) {
       type = "hazard";

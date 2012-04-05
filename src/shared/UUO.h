@@ -1,6 +1,8 @@
 #ifndef UUO_HEADER
 #define UUO_HEADER
 
+#include <queue>
+
 using namespace std;
 
 class Uuo { // unidentified underwater vehicle
@@ -40,6 +42,25 @@ public:
 	else {
 	    return true;
 	}
+    }
+
+    bool operator <(const Uuo& u) const {
+      // priority queue comparison
+      if (u.classifyCount < 1) {
+	return true;
+      }
+      else {
+	return false;
+      }
+    }
+
+    bool operator() (Uuo& u1, Uuo& u2) {
+      if (u1.classifyCount < 1) {
+	return true;
+      }
+      else {
+	return false;
+      }
     }
 };
 

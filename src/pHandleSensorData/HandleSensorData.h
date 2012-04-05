@@ -56,6 +56,8 @@ private:
    double _starttime;
    double _endtime;
 
+   MarkerMap _map;
+
    // Sensor settings for this vehicle
    double _Pd;   // prob detection
    double _Pfa;  // prob false detection

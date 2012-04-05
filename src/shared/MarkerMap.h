@@ -9,8 +9,13 @@
 using namespace std;
 
 class MarkerMap {
+ public:
    map<int, Uuo> _mines;
    map<int, Uuo> _mines_other;
+
+   MarkerMap() {
+
+   };
 
    MarkerMap(string encodedMM) { this->fromString(encodedMM); };
 
