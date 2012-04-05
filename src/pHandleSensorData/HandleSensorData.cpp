@@ -78,10 +78,24 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
        // check if we got everything necessary
        if (paramcount == 4) {
-	 // TODO:
-	 // INTEGRATE NEW DATA WITH BAYES
+	 // We will always have this in our database already for
+	 // a classification:
+	 map<int, Uuo>::iterator it;
+	 it = _mines.find(label);
+	 if (it == _mines.end()) {
+	   cout << "ERROR!  classification uuo not found!" << endl;
+	 }
 
-	 m_Comms.Notify("LOCAL_SENSOR_MESSAGE", printStateMessage());
+	 // Do bayesian update
+	 double haz = it->second.probHazard;
+	 if (hazard) {
+	   it->second.probHazard = (_Pc*haz) / (_Pc*haz + (1-_Pc)*(1-haz));
+	 }
+	 else {
+	   it->second.probHazard = ( (1-_Pc)*haz ) / ( (1-_Pc)*haz + _Pc*(1-haz) );
+	 }
+
+	 //m_Comms.Notify("LOCAL_SENSOR_MESSAGE", printStateMessage());
 	 //	 cout << "Saw mine #" << label << endl;
 
 	 // Report to all vehicles the detection (when they come
@@ -105,6 +119,56 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
      }
      else if (key == "HANDLE_SENSOR_MESSAGE") {
        parseStateMessage(msg.GetString());
+     }
+
+     else if (key == "UHZ_DETECTION_REPORT") {
+// Parse String
+       string str = msg.GetString();
+       vector<string> strv = parseString(str,",");
+
+       double x,y;
+       bool hazard;
+       int label, paramcount = 0;
+
+       for (int i = 0; i < strv.size(); i++) {
+	 vector<string> input = parseString(strv[i],"=");
+
+	 if (input[0] == "x") {
+	   x = atof(input[1].c_str());
+	   paramcount++;
+	 }
+	 else if (input[0] == "y") {
+	   y = atof(input[1].c_str());
+	   paramcount++;
+	 }
+	 else if (input[0] == "label") {
+	   label = atoi(input[1].c_str());
+	   paramcount++;
+	 }
+       }
+
+       // check if we got everything necessary
+       if (paramcount == 3) {
+	 // TODO:
+	 // INTEGRATE NEW DATA WITH BAYES
+	 Uuo newMine;
+	 newMine.x = x;
+	 newMine.y = y;
+	 newMine.id = label;
+	 map<int, Uuo>::iterator it;
+
+	 it = _mines.find(label);
+	 if (it == _mines.end()) {
+	   // add new sighting to map
+	   newMine.classifyCount = 1;
+	   _mines.insert(pair<int,Uuo>(label,newMine));
+	 }
+	 else {
+	   // do bayesian update
+	   double haz = it->second.probHazard;
+	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
+	 }
+       }
      }
    }
 	
@@ -320,6 +384,12 @@ bool HandleSensorData::OnStartUp()
   //  _allDone = false;
   _report_count = 0;
   _starttime = MOOSTime();
+
+  // Default sensor settings
+  _Pd = 1;
+  _Pfa = 1;
+  _Pc = 0.6;
+  _width = 25;
 
   STRING_LIST sParams;
   m_MissionReader.GetConfiguration(GetAppName(), sParams);

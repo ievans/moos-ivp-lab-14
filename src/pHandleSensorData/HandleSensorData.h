@@ -31,7 +31,7 @@ class Uuo { // unitenditfied underwater vehicle
     id = -1;
 
     // default initialization
-    probHazard = 0.5; // Maximum entropy?  Better prior?
+    probHazard = 0.1; // Maximum entropy?  Better prior?
     classifyCount = 0;
   }
 
@@ -89,6 +89,12 @@ private:
    int _report_count;
    double _starttime;
    double _endtime;
+
+   // Sensor settings for this vehicle
+   double _Pd;   // prob detection
+   double _Pfa;  // prob false detection
+   double _Pc;   // prob classification
+   int _width;   // swath width
 };
 
 #endif 
