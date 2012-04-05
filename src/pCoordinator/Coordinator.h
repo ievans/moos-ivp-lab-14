@@ -23,6 +23,11 @@
 #include "Point2D.h"
 #include "Order.h"
 
+enum GameState { 
+    INITIAL,
+    SEARCHING,
+ };
+
 class Coordinator : public CMOOSApp
 {
  public:
@@ -37,7 +42,7 @@ class Coordinator : public CMOOSApp
    void RegisterVariables();
 
 private:
-	// insert local vars here
+   GameState overallState;
 };
 
 #endif 

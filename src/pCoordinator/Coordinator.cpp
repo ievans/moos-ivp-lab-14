@@ -5,6 +5,8 @@
 /*    DATE:                                                 */
 /************************************************************/
 
+#define FUSE_COMPLETE_MESSAGE_NAME "FUSE_COMPLETE"
+
 #include <iterator>
 #include "Coordinator.h"
 
@@ -15,6 +17,7 @@ using namespace std;
 
 Coordinator::Coordinator()
 {
+    gameState = GameState.INITIAL;
 }
 
 //---------------------------------------------------------
@@ -23,6 +26,18 @@ Coordinator::Coordinator()
 Coordinator::~Coordinator()
 {
 }
+
+Coordinator::onFuseComplete() {
+	  if (overallState == GameState.INITIAL) {
+	      overallState == GameState.ALL_LAWNMOW;
+	  }
+
+	  BehaviorOrder lawnmow = new BehaviorOrder("lawnmower");
+	  
+}
+
+	  
+
 
 //---------------------------------------------------------
 // Procedure: OnNewMail
@@ -33,6 +48,12 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
    
    for(p=NewMail.begin(); p!=NewMail.end(); p++) {
       CMOOSMsg &msg = *p;
+
+      if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME) {
+	  string map = msg.GetString();
+	  this->onFuseComplete();
+      }
+
    }
 	
    return(true);
@@ -58,7 +79,11 @@ bool Coordinator::OnConnectToServer()
 bool Coordinator::Iterate()
 {
    // happens AppTick times per second
-	
+
+   // check the marker map. how many blocks have been found? 
+   // should we change out of lawnmow behavior to the waypoint 
+    // search + rendezvous state?
+
    return(true);
 }
 
@@ -78,6 +103,6 @@ bool Coordinator::OnStartUp()
 
 void Coordinator::RegisterVariables()
 {
-   //m_Comms.Register("FOOBAR", 0);
+    m_Comms.Register(FUSE_COMPLETE_MESSAGE_NAME, 0);
 }
 
