@@ -1,0 +1,24 @@
+//--------------------------------------------------------
+// uXMS Configuration Block (Created from Plugin)
+
+ProcessConfig = uXMS
+{
+  AppTick   = 2
+  CommsTick = 2
+  
+//  VAR = CONTACTS_LIST
+//  VAR = CONTACTS_ALERTED
+//  VAR = CONTACTS_UNALERTED
+//  VAR = CONTACTS_RECAP
+//  VAR = CONTACTS_RETIRED
+//  VAR = NODE_REPORT
+//  VAR = CONTACT_INFO
+//  VAR = CONTACT_RESOLVED
+//  VAR = CONTACT_MGR_WARNING
+
+  VAR = NODE_MESSAGE, HANDLE_SENSOR_MESSAGE, UHZ_HAZARD_REPORT
+  VAR = NODE_MESSAGE_LOCAL, UP_TOUR_PTS, SURVEY, DEPLOY, RETURN
+  VAR = LOCAL_SENSOR_MESSAGE, ALL_DONE, RECHECKED
+}
+
+

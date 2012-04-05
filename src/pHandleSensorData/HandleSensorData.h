@@ -12,6 +12,7 @@
 #include "MBUtils.h"
 #include <stdlib.h>
 #include "XYHazardSet.h"
+#include <math.h>
 
 using namespace std;
 
@@ -75,6 +76,7 @@ private:
    void classifyUuos();
    void generateHazardReport();
    void parseStateMessage(string);
+   void installSensor(int,double);
 
    string _vehicle_name;
    map<int, Uuo> _mines;

@@ -122,7 +122,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
      }
 
      else if (key == "UHZ_DETECTION_REPORT") {
-// Parse String
+       // Parse String
        string str = msg.GetString();
        vector<string> strv = parseString(str,",");
 
@@ -149,8 +149,6 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
        // check if we got everything necessary
        if (paramcount == 3) {
-	 // TODO:
-	 // INTEGRATE NEW DATA WITH BAYES
 	 Uuo newMine;
 	 newMine.x = x;
 	 newMine.y = y;
@@ -168,6 +166,29 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	   double haz = it->second.probHazard;
 	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
 	 }
+       }
+     }
+     else if (key == "UHZ_CONFIG_REQUEST") {
+       // Parse String
+       string str = msg.GetString();
+       vector<string> strv = parseString(str,",");
+
+       int width = -1;
+       double pd = -1;
+
+       for (int i = 0; i < strv.size(); i++) {
+	 vector<string> input = parseString(strv[i],"=");
+
+	 if (input[0] == "width") {
+	   width = atoi(input[1].c_str());
+	 }
+	 else if (input[0] == "pd") {
+	   pd = atof(input[1].c_str());
+	 }
+       }
+
+       if (width != -1 && pd != -1) {
+	 installSensor(width,pd);
        }
      }
    }
@@ -329,7 +350,7 @@ bool HandleSensorData::Iterate()
     //    cout << "Trying to publish " << printStateMessage() << endl;
 
     // Post local copy
-    m_Comms.Notify("LOCAL_SENSOR_MESSAGE", printStateMessage());
+    //    m_Comms.Notify("LOCAL_SENSOR_MESSAGE", printStateMessage());
 
     // reset iteration counter
     _iter_count = 0;
@@ -365,6 +386,47 @@ void HandleSensorData::generateHazardReport() {
   m_Comms.Notify("HAZARD_REPORT", out );
 }
 
+void HandleSensorData::installSensor(int width, double pd) {
+  // check for validity
+  if (width != 50 || width != 25 || width != 10 || width != 5) {
+    cout << "Invalid width installed" << endl;
+  }
+  else if (pd < 0 || pd > 1) {
+    cout << "Invalid pd installed" << endl;
+  }
+  else {
+    if (width == 50) {
+      _width = 50;
+      _Pc = 0.6;
+      _Pd = pd;
+      _Pc = pow(pd,2);
+    }
+    else if (width == 25) {
+      _width = 25;
+      _Pc = 0.8;
+      _Pd = pd;
+      _Pc = pow(pd,4);
+    }
+    else if (width == 10) {
+      _width = 10;
+      _Pc = 0.93;
+      _Pd = pd;
+      _Pc = pow(pd,6);
+    }
+    else if (width == 5) {
+      _width = 5;
+      _Pc = 0.98;
+      _Pd = pd;
+      _Pc = pow(pd,8);
+    }
+    else {
+      cout << "How the hell did you get here?" << endl;
+    }
+  }
+
+  return;
+}
+
 //---------------------------------------------------------
 // Procedure: OnStartUp()
 
@@ -386,10 +448,7 @@ bool HandleSensorData::OnStartUp()
   _starttime = MOOSTime();
 
   // Default sensor settings
-  _Pd = 1;
-  _Pfa = 1;
-  _Pc = 0.6;
-  _width = 25;
+  installSensor(50,0.9); // Widest sensor, sensible Pd
 
   STRING_LIST sParams;
   m_MissionReader.GetConfiguration(GetAppName(), sParams);
@@ -444,6 +503,7 @@ void HandleSensorData::RegisterVariables()
   //  m_Comms.Register("SURVEY", 0);
   //  m_Comms.Register("RECHECKED", 0);
   //  m_Comms.Register("ALL_DONE", 0);
+  m_Comms.Register("UHZ_CONFIG_REQUEST", 0);
 
   if (_isPrimary) {
     m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);

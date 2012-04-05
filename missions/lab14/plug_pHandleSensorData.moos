@@ -1,0 +1,9 @@
+
+ProcessConfig = pHandleSensorData
+{
+  AppTick = 4
+  CommsTick = 4
+
+  VEHICLE_NAME = $(VNAME)
+  SET_PRIMARY = FALSE
+}

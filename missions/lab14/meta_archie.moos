@@ -1,0 +1,80 @@
+ServerHost = localhost
+//ServerHost = $(SHOREIP)
+ServerPort = $(VPORT)
+Simulator  = true
+
+// Community name IS the vehicle name
+Community  = $(VNAME)
+
+#include plug_origin_warp.moos
+  
+//------------------------------------------------------------
+Processconfig = ANTLER
+{
+  MSBetweenLaunches = 200
+   
+  Run = MOOSDB           @ NewConsole = false
+  Run = uSimMarine       @ NewConsole = false
+  Run = pHostInfo        @ NewConsole = false
+  Run = pMOOSBridge      @ NewConsole = false ~ pMOOSBridge_%(VNAME)
+//  Run = pLogger          @ NewConsole = false
+  Run = pNodeReporter    @ NewConsole = false
+  Run = pMarinePID       @ NewConsole = false
+  Run = pHelmIvP         @ NewConsole = false
+  Run = uProcessWatch    @ NewConsole = false
+  Run = uTimerScript     @ NewConsole = false
+  Run = uTimerScript     @ NewConsole = false ~ uTimerScript_SensorConfig
+  Run = uFldNodeBroker   @ NewConsole = false
+  Run = pHandleSensorData @ NewConsole = false
+  Run = uXMS             @ NewConsole = true
+  Run = pHazardPath      @ NewConsole = false
+  Run = uFldMessageHandler @ NewConsole = false
+}
+
+#include "plug_pHandleSensorData.moos"
+#include "plug_uXMS.moos"
+#include "plug_uFldMessageHandler.moos"
+
+ProcessConfig = pHazardPath
+{
+  AppTick = 4
+  CommsTick = 4
+
+  LISTEN_LOCAL_ONLY = TRUE
+}
+
+ProcessConfig = uTimerScript_SensorConfig 
+{
+  RESET_MAX  = 0
+  CONDITION  = (NAV_SPEED > 0)
+
+//  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=archie,width=50,pd=1.0", time=0.1
+  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=archie,width=50,pd=1.0", time=0.1
+}
+  
+//------------------------------------------
+// uTimerScript config block
+
+ProcessConfig = uTimerScript
+{
+  AppTick	= 4
+  CommsTick	= 4
+
+  PAUSED     = false
+  RESET_MAX  = nolimit
+  RESET_TIME = end
+  CONDITION  = (NAV_SPEED > 0)
+
+  EVENT = var=UHZ_SENSOR_REQUEST, val="vname=archie", time=0.5
+}
+
+
+#include plug_uFldNodeBroker.moos
+#include plug_pHostInfo.moos
+#include plug_pMOOSBridgeV.moos
+#include plug_uSimMarine.moos
+#include plug_pHelmIvP.moos
+#include plug_pMarinePID.moos
+#include plug_pLogger.moos
+#include plug_pNodeReporter.moos
+#include plug_uProcessWatch.moos
