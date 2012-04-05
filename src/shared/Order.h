@@ -9,27 +9,30 @@
 
 class OrderType {
 public:
-    int type;
     static const int WAYPOINT_ORDER = 0;
     static const int BEHAVIOR_ORDER = 1;
 };
 
 class Order {
 public:
-    OrderType type;
-    virtual string toString();
+    int type;
+    string toString() {
+	return "jk";
+    }
 };
 
 class WaypointOrder : public Order {
 public:
     Point2D waypoint;
-    WaypointOrder(Point2D w) { waypoint = w; }
+    WaypointOrder(Point2D w) { type = OrderType::WAYPOINT_ORDER; waypoint = w; };
+    string toString() { return ""; }
 };
 
 class BehaviorOrder : public Order {
 public:
     string newBehavior;
-    BehaviorOrder(string behaviorString) { newBehavior = behaviorString; }
+    BehaviorOrder(string behaviorString) { type = OrderType::BEHAVIOR_ORDER; newBehavior = behaviorString; }
+    string toString() { return ""; }
 };
 
 #endif

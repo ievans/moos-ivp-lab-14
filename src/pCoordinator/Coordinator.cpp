@@ -32,24 +32,30 @@ vector<Uuo> getNMostValuableUuos(int n) {
     return topN;
 }
 
+#define LAWNMOW_BEHAVIOR_STRING "lawmow"
+#define WAYPOINT_BEHVIOR_STRING "waypoint"
+
 void Coordinator::stateTransition(GameState newState) {
     if (gameState == INITIAL && newState == ALL_LAWNMOW) {
-	BehaviorOrder lawnmow = BehaviorOrder("lawnmower");
+	BehaviorOrder lawnmow = BehaviorOrder(LAWNMOW_BEHAVIOR_STRING);
 	vector<Order> orders;
 	orders.push_back(lawnmow);
 	sendOrdersToMaster(orders);
 	sendOrdersToSlaves(orders);
     } else if (gameState == ALL_LAWNMOW && newState == LAWNMOW_AND_INSPECT) {
 	// keep the master in lawmow mode
-	BehaviorOrder lawnmow = BehaviorOrder("lawnmower");
+	BehaviorOrder lawnmow = BehaviorOrder(LAWNMOW_BEHAVIOR_STRING);
 	vector<Order> orders;
 	orders.push_back(lawnmow);
 	sendOrdersToMaster(orders);
+
+	vector<Order> slaveOrders;
+	BehaviorOrder wpb = BehaviorOrder(WAYPOINT_BEHVIOR_STRING);
+	slaveOrders.push_back(wpb);
+
 	// generate waypoint behaviors for the slave
 	WaypointOrder wp = WaypointOrder(Point2D(0, 0));
-	
-	vector<Order> slaveOrders;
-	orders.push_back(wp);
+	slaveOrders.push_back(wp);
 
 	sendOrdersToSlaves(slaveOrders);
     }
