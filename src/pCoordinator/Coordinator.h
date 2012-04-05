@@ -1,8 +1,8 @@
 /************************************************************/
-/*    NAME:                                               */
+/*    NAME: Isaac Evans                                     */
 /*    ORGN: MIT                                             */
-/*    FILE: Coordinator.h                                          */
-/*    DATE:                                                 */
+/*    FILE: Coordinator.h                                   */
+/*    DATE: April 5, 2012                                   */
 /************************************************************/
 
 #ifndef Coordinator_HEADER
@@ -22,10 +22,13 @@
 // Local data structures
 #include "../shared/Point2D.h"
 #include "../shared/Order.h"
+#include "../shared/UUO.h"
+#include "../shared/MarkerMap.h"
 
 enum GameState { 
     INITIAL,
-    SEARCHING,
+    ALL_LAWNMOW,
+    LAWNMOW_AND_INSPECT,
  };
 
 class Coordinator : public CMOOSApp
@@ -41,8 +44,13 @@ class Coordinator : public CMOOSApp
    bool OnStartUp();
    void RegisterVariables();
 
+   void stateTransition(GameState gs);
+   void sendOrdersToSlaves(vector<Order> orders);
+   void sendOrdersToMaster(vector<Order> orders);
+   vector<Uuo> getNMostValuableUuos(int n);
+
 private:
-   GameState overallState;
+   GameState gameState;
 };
 
 #endif 

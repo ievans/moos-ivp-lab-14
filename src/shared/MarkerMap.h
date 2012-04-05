@@ -1,3 +1,10 @@
+/************************************************************/
+/*    NAME: Isaac Evans, Robin Truax                        */
+/*    ORGN: MIT                                             */
+/*    FILE: MarkerMap.h                                     */
+/*    DATE: April 5, 2012                                   */
+/************************************************************/
+
 #include "MOOSLib.h"
 #include "MBUtils.h"
 #include <stdlib.h>
@@ -9,7 +16,7 @@
 using namespace std;
 
 class MarkerMap {
- public:
+public:
    map<int, Uuo> _mines;
    map<int, Uuo> _mines_other;
 
