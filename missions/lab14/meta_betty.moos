@@ -26,7 +26,6 @@ Processconfig = ANTLER
   Run = uTimerScript     @ NewConsole = false
   Run = uTimerScript     @ NewConsole = false ~ uTimerScript_SensorConfig
   Run = uXMS             @ NewConsole = true
-  Run = pHazardPath      @ NewConsole = false
   Run = pHandleSensorData @ NewConsole = false
 }
 
@@ -69,7 +68,7 @@ ProcessConfig = uTimerScript_SensorConfig
   CONDITION  = (NAV_SPEED > 0)
 //  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=betty,width=10,pd=0.9", time=0.1
 
-  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=betty,width=50,pd=1.0", time=0.1
+  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=betty,width=5,pd=0.999", time=0.1
 }
 
   
