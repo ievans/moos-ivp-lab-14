@@ -2,6 +2,8 @@
 
 initialize   DEPLOY = false
 initialize   RETURN = false
+initialize   COORDMODE = init
+// others are lawnmow, waypoint
 
 
 Set MODE = ACTIVE
@@ -15,24 +17,14 @@ Set MODE = RETURNING
   RETURN = true
 } WORKING
 
-Set MODE = TOURING
-{
-  MODE   = ACTIVE:WORKING
-  SURVEY = COMPLETE
-}  SURVEYING
-
 //----------------------------------------------
 Behavior = BHV_Waypoint
 { 
   name      = waypt_survey
   pwt       = 100
-//  condition = RETURN = false
-//  condition = (DEPLOY = true)
-//  condition = (SURVEY != "COMPLETE")
-  condition = MODE == SURVEYING
-//  endflag   = RETURN = true
+  condition = MODE == WORKING
+  condition = COORDMODE == lawnmow
   endflag = SURVEY = COMPLETE
-  endflag = UHZ_CONFIG_REQUEST = "vname=archie,width=10,pd=1.0"
   perpetual = true
 
          speed = 2   // meters per second
@@ -40,20 +32,10 @@ Behavior = BHV_Waypoint
    slip_radius = 15.0
           lead = 15
 
-//	points = -200,-130:-90,-420:-57,-402:-170,-120:-129,-104:-22,-388:20,-370:-84,-85:-42,-69:59,-354:100,-339:-2,-53:39,-34:140,-322:175,-311:80,-23:121,-7:216,-290:256,-275:167,3:203,14:296,-260:330,-244:244,6
-
-//	points = -2,-53:39,-34:140,-322:175,-311
-
-//        points = format=lawnmower, label=initSweep, x=125, y=-237.5, height=375, width=550, lane_width=40, rows=north-south, degs=0
-
         points = format=lawnmower, label=initSweep, x=-12.5, y=-237.5, height=325, width=225, lane_width=90, rows=north-south, degs=0
 
-//        points = format=lawnmower, label=initSweep, x=-12.5, y=-2.5, height=25, width=25, lane_width=90, rows=north-south, degs=0
 
-//       endflag = NODE_MESSAGE = src_node=archie,dest_node=betty,var_name=SURVEY,string_val=COMPLETE
-       endflag = SURVEY=COMPLETE
-
-        repeat = 0
+  repeat = 0
   visual_hints = nextpt_color=red, nextpt_lcolor=green
   visual_hints = vertex_color=yellow, edge_color=gray25
   visual_hints = vertex_size=1, edge_size=1
@@ -61,18 +43,12 @@ Behavior = BHV_Waypoint
 
 Behavior = BHV_Waypoint
 { 
-  name      = wpt_tour
+  name      = wpt_follow
   pwt       = 100
-//  condition = RETURN = false
-//  condition = (DEPLOY = true)
-//  condition = (SURVEY = COMPLETE)
-  condition = MODE == TOURING
-  updates   = UP_TOUR_PTS
-  endflag   = RETURN = true
-  endflag   = RECHECKED = true
+  condition = MODE == WORKING
+  updates   = UP_WPT_PTS
 
   perpetual = true
-  repeat = 1
 
  //        speed = 1.5   // meters per second
          speed = 2.0
@@ -93,13 +69,10 @@ Behavior = BHV_Waypoint
 {
   name       = waypt_return
   pwt        = 100
-//  condition  = RETURN = true
-//  condition  = DEPLOY = true
   condition = MODE == RETURNING
   perpetual  = true
   endflag    = RETURN = false
   endflag    = DEPLOY = false
-  endflag    = NODE_MESSAGE_LOCAL = src_node=archie,dest_node=betty,var_name=SURVEY,string_val=COMPLETE
 
          speed = 2.0
         radius = 2.0
