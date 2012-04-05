@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include "XYHazardSet.h"
 #include <math.h>
+#include <queue>
 
 #include "../shared/UUO.h"
 #include "../shared/MarkerMap.h"
@@ -40,8 +41,10 @@ private:
    void generateHazardReport();
    void parseStateMessage(string);
    void installSensor(int,double);
+   void installSensor(int,double,double,double);
 
    string _vehicle_name;
+
    bool _isPrimary;
    int _msg_idx;
    int _iter_count;
@@ -58,6 +61,8 @@ private:
    double _Pfa;  // prob false detection
    double _Pc;   // prob classification
    int _width;   // swath width
+
+   priority_queue<Uuo> classifyQueue;
 };
 
 #endif 

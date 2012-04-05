@@ -42,6 +42,7 @@ ProcessConfig = uFldHazardSensor
   sensor_config = width=25, exp=4, class=0.85
   sensor_config = width=50, exp=2, class=0.60
   sensor_config = width=10, exp=6, class=0.93
+  sensor_config = width=5,  exp=8, class=0.98
 
   swath_length  = 5
 
@@ -55,8 +56,8 @@ ProcessConfig = uFldHazardSensor
   show_hazards=true
   //show_reports=44
 
- // hazard_file   = hazards.txt
-  hazard_file   = hazards_new.txt
+  hazard_file   = hazards.txt
+ // hazard_file   = hazards_new.txt
   verbose       = true
 }
 

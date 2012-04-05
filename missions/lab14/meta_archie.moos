@@ -27,7 +27,6 @@ Processconfig = ANTLER
   Run = uFldNodeBroker   @ NewConsole = false
   Run = pHandleSensorData @ NewConsole = false
   Run = uXMS             @ NewConsole = true
-  Run = pHazardPath      @ NewConsole = false
   Run = uFldMessageHandler @ NewConsole = false
 }
 
@@ -35,21 +34,12 @@ Processconfig = ANTLER
 #include "plug_uXMS.moos"
 #include "plug_uFldMessageHandler.moos"
 
-ProcessConfig = pHazardPath
-{
-  AppTick = 4
-  CommsTick = 4
-
-  LISTEN_LOCAL_ONLY = TRUE
-}
-
 ProcessConfig = uTimerScript_SensorConfig 
 {
   RESET_MAX  = 0
   CONDITION  = (NAV_SPEED > 0)
 
-//  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=archie,width=50,pd=1.0", time=0.1
-  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=archie,width=50,pd=1.0", time=0.1
+  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=$(VNAME),width=50,pd=1.0", time=0.1
 }
   
 //------------------------------------------
@@ -65,7 +55,7 @@ ProcessConfig = uTimerScript
   RESET_TIME = end
   CONDITION  = (NAV_SPEED > 0)
 
-  EVENT = var=UHZ_SENSOR_REQUEST, val="vname=archie", time=0.5
+  EVENT = var=UHZ_SENSOR_REQUEST, val="vname=$(VNAME)", time=0.5
 }
 
 

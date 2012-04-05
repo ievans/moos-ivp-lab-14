@@ -5,7 +5,7 @@
 /*    DATE:                                                 */
 /************************************************************/
 
-#include <iterator>
+//#include <iterator>
 #include "HandleSensorData.h"
 
 using namespace std;
@@ -168,13 +168,15 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 }
        }
      }
-     else if (key == "UHZ_CONFIG_REQUEST") {
+     else if (key == "UHZ_CONFIG_ACK") {
        // Parse String
        string str = msg.GetString();
        vector<string> strv = parseString(str,",");
 
        int width = -1;
        double pd = -1;
+       double pfa = -1;
+       double pclass = -1;
 
        for (int i = 0; i < strv.size(); i++) {
 	 vector<string> input = parseString(strv[i],"=");
@@ -185,10 +187,16 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 else if (input[0] == "pd") {
 	   pd = atof(input[1].c_str());
 	 }
+	 else if (input[0] == "pfa") {
+	   pfa = atof(input[1].c_str());
+	 }
+	 else if (input[0] == "pclass") {
+	   pclass = atof(input[1].c_str());
+	 }
        }
 
-       if (width != -1 && pd != -1) {
-	 installSensor(width,pd);
+       if (width != -1 && pd != -1 && pfa != -1 && pclass != -1) {
+	 installSensor(width,pd,pfa,pclass);
        }
      }
    }
@@ -243,36 +251,6 @@ void HandleSensorData::parseStateMessage(string msg) {
 
 void HandleSensorData::classifyUuos() {
 
-  //TODO
-  /*
-  map<int, Uuo>::iterator it, itother;
-
-  // First, combine other_mine list into primary mine list
-  for (itother = _mines_other.begin(); itother != _mines_other.end(); itother++) {
-    it = _mines.find(itother->second.label);
-    if (it == _mines.end()) {
-      // add in
-      _mines.insert(*itother);
-    }
-    else {
-      // add in counts
-      it->second.hazard_count += itother->second.hazard_count;
-      it->second.neutral_count += itother->second.neutral_count;
-    }
-  }
-
-
-  for (it = _mines.begin(); it != _mines.end(); it++) {
-    int hazardcount = it->second.hazard_count;
-    int neutralcount = it->second.neutral_count;
-    if (hazardcount >= neutralcount) {
-      it->second.isHazard = true;
-    }
-    else {
-      it->second.isHazard = false;
-    }
-  }
-  */
   return;
 }
 
@@ -399,29 +377,53 @@ void HandleSensorData::installSensor(int width, double pd) {
       _width = 50;
       _Pc = 0.6;
       _Pd = pd;
-      _Pc = pow(pd,2);
+      _Pfa = pow(pd,2);
     }
     else if (width == 25) {
       _width = 25;
       _Pc = 0.8;
       _Pd = pd;
-      _Pc = pow(pd,4);
+      _Pfa = pow(pd,4);
     }
     else if (width == 10) {
       _width = 10;
       _Pc = 0.93;
       _Pd = pd;
-      _Pc = pow(pd,6);
+      _Pfa = pow(pd,6);
     }
     else if (width == 5) {
       _width = 5;
       _Pc = 0.98;
       _Pd = pd;
-      _Pc = pow(pd,8);
+      _Pfa = pow(pd,8);
     }
     else {
       cout << "How the hell did you get here?" << endl;
     }
+  }
+
+  return;
+}
+
+void HandleSensorData::installSensor(int width, double pd, double pfa, double pclass) {
+  // check for validity
+  if (width != 50 || width != 25 || width != 10 || width != 5) {
+    cout << "Invalid width installed" << endl;
+  }
+  else if (pd < 0 || pd > 1) {
+    cout << "Invalid pd installed" << endl;
+  }
+  else if (pfa < 0 || pfa > 1) {
+    cout << "Invalid pfa installed" << endl;
+  }
+  else if (pclass < 0 || pclass > 1) {
+    cout << "Invalid pclass installed" << endl;
+  }
+  else {
+    _width = width;
+    _Pc = pclass;
+    _Pd = pd;
+    _Pfa = pfa;
   }
 
   return;
@@ -503,7 +505,7 @@ void HandleSensorData::RegisterVariables()
   //  m_Comms.Register("SURVEY", 0);
   //  m_Comms.Register("RECHECKED", 0);
   //  m_Comms.Register("ALL_DONE", 0);
-  m_Comms.Register("UHZ_CONFIG_REQUEST", 0);
+  m_Comms.Register("UHZ_CONFIG_ACK", 0);
 
   if (_isPrimary) {
     m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
