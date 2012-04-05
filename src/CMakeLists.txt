@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES(${LOCAL_LIBRARY_DIRS})
 #============================================================================
 #ADD_SUBDIRECTORY(lib_behaviors-test)
 ADD_SUBDIRECTORY(pHandleSensorData)
+ADD_SUBDIRECTORY(pCoordinator)
 
 ##############################################################################
 #                           END of CMakeLists.txt
