@@ -205,63 +205,12 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 }
 
 void HandleSensorData::parseStateMessage(string msg) {
-  Uuo mine;
-  map<int,Uuo>::iterator it;
-  vector<string> strvect = parseString(msg,":");
-  for (int i = 0; i < strvect.size(); i++) {
-
-    Uuo newMine;
-    vector<string> in = parseString(strvect[i],",");
-    for (int j = 0; j < in.size(); j++) {
-      vector<string> var = parseString(in[j],"=");
-
-      if (var[0] == "id") {
-	newMine.id = atoi(var[1].c_str());
-      }
-      else if(var[0] == "x") {
-	newMine.x = atof(var[1].c_str());
-      }
-      else if(var[0] == "y") {
-	newMine.y = atof(var[1].c_str());
-      }
-      else if(var[0] == "pH") {
-	newMine.probHazard = atof(var[1].c_str());
-      }
-      else if(var[0] == "cc") {
-	newMine.classifyCount = atoi(var[1].c_str());
-      }
-    }
-
-    if (newMine.isInitialized()) {
-      // integrate new mine
-      it = _map._mines_other.find(newMine.id);
-      if (it == _map._mines_other.end()) {
-	_map._mines_other.insert( pair<int,Uuo>(newMine.id,newMine) );
-      }
-      else {
-	it->second = newMine;
-      }
-    }
-    else {
-      cout << "Invalid mine message received:" << endl;
-      cout << msg << endl;
-    }
-  }
+  _map.fromStringToOther(msg);
 }
 
 void HandleSensorData::classifyUuos() {
 
   return;
-}
-
-string HandleSensorData::printUuoList() {
-  stringstream out;
-  map<int, Uuo>::iterator it;
-  for (it = _map._mines.begin(); it != _map._mines.end(); it++) {
-    out << "Uuo[" << it->second.id <<"] = (" << it->second.x << ","
-	<< it->second.y << ") hazard=" << it->second.isHazard() << endl;
-  }
-  return out.str();
 }
 
 //---------------------------------------------------------
@@ -279,36 +228,7 @@ bool HandleSensorData::OnConnectToServer()
 }
 
 string HandleSensorData::printStateMessage() {
-
-  // TODO:  Compress later
-  // Message format:
-  // : separated
-  // id,xpos,ypos,pH,cc
-
-  stringstream msg;
-  map<int, Uuo>::iterator it;
-
-  if (_map._mines.begin() == _map._mines.end()) {
-    msg << "NONE";
-  }
-  else {
-    it = _map._mines.begin();
-    msg << "id=" << it->second.id << "," 
-	<< "x=" << it->second.x << "," 
-	<< "y=" << it->second.y << ","
-	<< "pH=" << it->second.probHazard << "," 
-	<< "cc=" << it->second.classifyCount;
-
-    for (it++; it != _map._mines.end(); it++) {
-      msg << ":" << "id=" << it->second.id << "," 
-	  << "x=" << it->second.x << "," 
-	  << "y=" << it->second.y << ","
-	  << "pH=" << it->second.probHazard << "," 
-	  << "cc=" << it->second.classifyCount;
-    }
-  }
-
-  return msg.str();
+  return _map.toString();
 }
 
 //---------------------------------------------------------
