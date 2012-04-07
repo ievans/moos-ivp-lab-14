@@ -56,6 +56,8 @@ ProcessConfig = uFldHazardSensor
   show_hazards=true
   //show_reports=44
 
+  classify_period = 30
+
   hazard_file   = hazards.txt
  // hazard_file   = hazards_new.txt
   verbose       = true

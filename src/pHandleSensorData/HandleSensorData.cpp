@@ -162,6 +162,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	   _map._mines.insert(pair<int,Uuo>(label,newMine));
 	 }
 	 else {
+	   it->second.classifyCount++;
 	   // do bayesian update
 	   double haz = it->second.probHazard;
 	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
@@ -208,8 +209,53 @@ void HandleSensorData::parseStateMessage(string msg) {
   _map.fromStringToOther(msg);
 }
 
-void HandleSensorData::classifyUuos() {
+double getPriority(Uuo& mine) {
+  // Assume triangle priority.  zero at hazProb = {0,1} and
+  // one at hazProb = {PRIOR_PROB}
+  // Biases towards points nearest default
+  // However, also bias toward low label numbers
+  double priority;
+  if (mine.probHazard < PRIOR_PROB) {
+    priority = 1.0/PRIOR_PROB * mine.probHazard;
+  }
+  else {
+    // point slope formulation
+    priority = 1 + -1.0/(1-PRIOR_PROB) * (mine.probHazard - PRIOR_PROB);
+  }
 
+  return priority;
+}
+
+void HandleSensorData::classifyUuos() {
+  if (MOOSTime() - _classifyTime > _classify_min_time) {
+    // find highest priority point
+    // TODO: What is highest priority???
+    map<int, Uuo>::iterator it;
+    double best_idx = -1;
+    double best_priority = -1;
+
+    // TODO: Linear search sux
+    for (it = _map._mines.begin(); it != _map._mines.end(); it++) {
+      if (it->second.classifyCount > 0) {
+	if (getPriority(it->second) > best_priority) {
+	  best_idx = it->second.id;
+	  best_priority = getPriority(it->second);
+	}
+      }
+    }
+
+    if (best_idx > -1) {
+      _map._mines[best_idx].classifyCount--;
+      // Post request
+      stringstream s;
+      s << "vname=" << tolower(_vehicle_name) << ",label="
+	<< best_idx << endl;
+      m_Comms.Notify("UHZ_CLASSIFY_REQUEST",s.str());
+    }
+    else {
+      // Do nothing, wait unitl we get mines or more measurements
+    }
+  }
   return;
 }
 
@@ -368,6 +414,9 @@ bool HandleSensorData::OnStartUp()
   //  _allDone = false;
   _report_count = 0;
   _starttime = MOOSTime();
+  _classifyTime = _starttime;
+  _endtime = 8500.0;
+  _classify_min_time = 30.0;
 
   // Default sensor settings
   installSensor(50,0.9); // Widest sensor, sensible Pd
@@ -402,12 +451,17 @@ bool HandleSensorData::OnStartUp()
       }
     }
 
-    /*    else if(MOOSStrCmp(sVarName, "NUMTOCOLLECT")) {
+    else if(MOOSStrCmp(sVarName, "CLASSIFY_MIN_TIME")) {
       if(!strContains(sLine, " ")) {
-	_numToCollect = atoi(stripBlankEnds(sLine).c_str());
-	_total_unvisited = _numToCollect;
+	_classify_min_time = atof(stripBlankEnds(sLine).c_str());
       }
-      }   */
+    }
+
+    else if(MOOSStrCmp(sVarName, "HAZARD_REPORT_TIME")) {
+      if(!strContains(sLine, " ")) {
+	_endtime = atof(stripBlankEnds(sLine).c_str());
+      }
+    }   
   }
 
    RegisterVariables();	

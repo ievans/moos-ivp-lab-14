@@ -3,6 +3,8 @@
 
 #include <queue>
 
+#define PRIOR_PROB 0.10
+
 using namespace std;
 
 class Uuo { // unidentified underwater vehicle
@@ -21,7 +23,7 @@ public:
 	id = -1;
 
 	// default initialization
-	probHazard = 0.1; // Maximum entropy?  Better prior?
+	probHazard = PRIOR_PROB; // Maximum entropy?  Better prior?
 	classifyCount = 0;
     }
 

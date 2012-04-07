@@ -1,5 +1,5 @@
 /************************************************************/
-/*    NAME: Isaac Evans, Robin Truax                        */
+/*    NAME: Isaac Evans, Robert Truax                        */
 /*    ORGN: MIT                                             */
 /*    FILE: MarkerMap.h                                     */
 /*    DATE: April 5, 2012                                   */

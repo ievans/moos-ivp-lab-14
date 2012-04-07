@@ -18,6 +18,8 @@
 #include "../shared/MarkerMap.h"
 #include "../shared/UUO.h"
 
+//#define CLASSIFY_MIN_TIME 30 // seconds
+
 class HandleSensorData : public CMOOSApp
 {
  public:
@@ -42,6 +44,8 @@ private:
    void installSensor(int,double,double,double);
 
    string _vehicle_name;
+   double _classify_min_time;
+   double _endtime;
 
    bool _isPrimary;
    int _msg_idx;
@@ -52,7 +56,6 @@ private:
    //  bool _allDone;
    int _report_count;
    double _starttime;
-   double _endtime;
 
    MarkerMap _map;
 
@@ -62,7 +65,12 @@ private:
    double _Pc;   // prob classification
    int _width;   // swath width
 
-   std::priority_queue<Uuo> classifyQueue;
+   // classify variables
+   double _classifyTime;
+
+   // Do something like this later?
+   // For use in doing classify priority
+   //std::priority_queue<Uuo> _classifyQueue;
 };
 
 #endif 
