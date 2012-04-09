@@ -47,7 +47,7 @@ ProcessConfig = uFldHazardSensor
   swath_length  = 5
 
   default_hazard_shape = triangle
-  default_benign_shape = triangle
+  default_benign_shape = square
 
   swath_transparency = 0.85
   seed_random        = false
@@ -58,9 +58,9 @@ ProcessConfig = uFldHazardSensor
 
   classify_period = 30
 
-  hazard_file   = hazards.txt
- // hazard_file   = hazards_new.txt
-  verbose       = true
+//  hazard_file   = hazards.txt
+  hazard_file   = hazards_set1.txt
+  verbose       = false
 }
 
 //--------------------------------------------------

@@ -39,7 +39,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
      string key = msg.GetKey();
 
-     cout << "Got Mail : " << msg.GetKey() << endl;
+     //     cout << "Got Mail : " << msg.GetKey() << endl;
 
      // This is a classification report
      if (key == "UHZ_HAZARD_REPORT") {
@@ -232,7 +232,7 @@ double getPriority(Uuo& mine) {
 
 void HandleSensorData::classifyUuos() {
   if (MOOSTime() - _classifyTime > _classify_min_time) {
-    cout << "Trying to Classify Something" << endl;
+    //    cout << "Trying to Classify Something" << endl;
     // find highest priority point
     // TODO: What is highest priority???
     map<int, Uuo>::iterator it;
@@ -249,7 +249,7 @@ void HandleSensorData::classifyUuos() {
       }
     }
 
-    cout << "Best idx was " << best_idx << endl;
+    //    cout << "Best idx was " << best_idx << endl;
     if (best_idx > -1) {
       _map._mines[best_idx].classifyCount--;
       // Post request
@@ -300,7 +300,7 @@ bool HandleSensorData::Iterate()
     msg << "src_node=" << tolower(_vehicle_name) 
 	<< ",dest_node=all,var_name=HANDLE_SENSOR_MESSAGE,string_val=\"" 
 	<< printStateMessage() << "\"";
-    m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
+    //    m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
     _msg_idx++;
     //    cout << "Trying to publish " << printStateMessage() << endl;
 
@@ -309,11 +309,18 @@ bool HandleSensorData::Iterate()
 
     // reset iteration counter
     _iter_count = 0;
+
+    //    cout << "Mission Time: " << MOOSTime() - _starttime << endl;
+    //    cout << "_isPrimary = " << _isPrimary << endl;
+    //    cout << "_lockout = " << _lockout << endl;
+    //    cout << "Timing: " << MOOSTime() << " - " << _starttime
+    //	 << " <> " << _endtime << endl;
   }
-  else if (_isPrimary && !_lockout && MOOSTime() - _starttime > _endtime) {
+
+  if (_isPrimary && !_lockout && MOOSTime() - _starttime > _endtime) {
+    cout << "Generating Report" << endl;
     generateHazardReport();
     _lockout = true;
-    _iter_count = 0;
   }
 
   _iter_count++;
