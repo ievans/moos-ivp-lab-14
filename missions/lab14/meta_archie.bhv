@@ -2,7 +2,7 @@
 
 initialize   DEPLOY = false
 initialize   RETURN = false
-initialize   COORDMODE = init
+initialize   COORDMODE = lawnmow
 // others are lawnmow, waypoint
 
 

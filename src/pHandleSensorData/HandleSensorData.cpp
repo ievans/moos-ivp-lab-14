@@ -39,6 +39,8 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
      string key = msg.GetKey();
 
+     cout << "Got Mail : " << msg.GetKey() << endl;
+
      // This is a classification report
      if (key == "UHZ_HAZARD_REPORT") {
        // Parse String
@@ -198,6 +200,8 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
        if (width != -1 && pd != -1 && pfa != -1 && pclass != -1) {
 	 installSensor(width,pd,pfa,pclass);
+	 cout << "Installing sensor: " << width << "," << pd
+	      << "," << pfa << "," << pclass << endl;
        }
      }
    }
@@ -228,6 +232,7 @@ double getPriority(Uuo& mine) {
 
 void HandleSensorData::classifyUuos() {
   if (MOOSTime() - _classifyTime > _classify_min_time) {
+    cout << "Trying to Classify Something" << endl;
     // find highest priority point
     // TODO: What is highest priority???
     map<int, Uuo>::iterator it;
@@ -244,6 +249,7 @@ void HandleSensorData::classifyUuos() {
       }
     }
 
+    cout << "Best idx was " << best_idx << endl;
     if (best_idx > -1) {
       _map._mines[best_idx].classifyCount--;
       // Post request
@@ -251,6 +257,7 @@ void HandleSensorData::classifyUuos() {
       s << "vname=" << tolower(_vehicle_name) << ",label="
 	<< best_idx << endl;
       m_Comms.Notify("UHZ_CLASSIFY_REQUEST",s.str());
+      _classifyTime = MOOSTime();
     }
     else {
       // Do nothing, wait unitl we get mines or more measurements
@@ -283,6 +290,10 @@ string HandleSensorData::printStateMessage() {
 bool HandleSensorData::Iterate()
 {	
   //  cout << "Iterate Start" << endl;
+
+  // run classify subroutine.  Handles time internally
+  classifyUuos();
+
   if (_iter_count == 200) {
     // Constantly send state messages to other vehicle
     stringstream msg;
@@ -300,7 +311,6 @@ bool HandleSensorData::Iterate()
     _iter_count = 0;
   }
   else if (_isPrimary && !_lockout && MOOSTime() - _starttime > _endtime) {
-    classifyUuos();
     generateHazardReport();
     _lockout = true;
     _iter_count = 0;
@@ -332,7 +342,7 @@ void HandleSensorData::generateHazardReport() {
 
 void HandleSensorData::installSensor(int width, double pd) {
   // check for validity
-  if (width != 50 || width != 25 || width != 10 || width != 5) {
+  if (!(width == 50 || width == 25 || width == 10 || width == 5)) {
     cout << "Invalid width installed" << endl;
   }
   else if (pd < 0 || pd > 1) {
@@ -373,7 +383,7 @@ void HandleSensorData::installSensor(int width, double pd) {
 
 void HandleSensorData::installSensor(int width, double pd, double pfa, double pclass) {
   // check for validity
-  if (width != 50 || width != 25 || width != 10 || width != 5) {
+  if (!(width == 50 || width == 25 || width == 10 || width == 5)) {
     cout << "Invalid width installed" << endl;
   }
   else if (pd < 0 || pd > 1) {
@@ -482,7 +492,7 @@ void HandleSensorData::RegisterVariables()
   m_Comms.Register("UHZ_CONFIG_ACK", 0);
 
   if (_isPrimary) {
-    m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
+    //    m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
   }
 }
 

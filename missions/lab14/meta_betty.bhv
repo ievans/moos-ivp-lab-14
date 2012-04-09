@@ -2,7 +2,7 @@
 
 initialize   DEPLOY = false
 initialize   RETURN = false
-initialize   COORDMODE = init
+initialize   COORDMODE = lawnmow
 // others are lawnmow, waypoint
 
 
@@ -32,7 +32,9 @@ Behavior = BHV_Waypoint
    slip_radius = 15.0
           lead = 15
 
-        points = format=lawnmower, label=initSweep, x=-12.5, y=-237.5, height=325, width=225, lane_width=90, rows=north-south, degs=0
+  //      points = format=lawnmower, label=initSweep, x=-12.5, y=-237.5, height=325, width=225, lane_width=90, rows=north-south, degs=0
+
+  points = format=lawnmower, label=initSweep, x=0, y=-30, height=60, width=10, lane_width=10, rows=north-south, degs=0
 
 
   repeat = 0

@@ -1,0 +1,4 @@
+
+hazard = x=-77,y=-362,type=hazard,label=42,hazard=true
+hazard = x=-57,y=-101,type=benign,label=11,hr=0.99,hazard=flase
+

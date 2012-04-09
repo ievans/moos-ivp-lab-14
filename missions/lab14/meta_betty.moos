@@ -26,7 +26,7 @@ Processconfig = ANTLER
   Run = uTimerScript     @ NewConsole = false
   Run = uTimerScript     @ NewConsole = false ~ uTimerScript_SensorConfig
   Run = uXMS             @ NewConsole = true
-  Run = pHandleSensorData @ NewConsole = false
+  Run = pHandleSensorData @ NewConsole = true
 }
 
 #include "plug_uXMS.moos"
@@ -66,9 +66,9 @@ ProcessConfig = uTimerScript_SensorConfig
 {
   RESET_MAX  = 0
   CONDITION  = (NAV_SPEED > 0)
-//  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=betty,width=10,pd=0.9", time=0.1
+  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=betty,width=10,pd=0.9", time=0.1
 
-  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=betty,width=5,pd=0.999", time=0.1
+//  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=betty,width=5,pd=0.999", time=0.1
 }
 
   
