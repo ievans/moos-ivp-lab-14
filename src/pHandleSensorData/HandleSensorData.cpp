@@ -218,7 +218,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 }
 
 void HandleSensorData::parseStateMessage(string msg) {
-  _map.fromStringToOther(msg);
+    _map.fromString(msg, true);
 }
 
 // does a bayesian fusion on this vehicle's map and the other vehicle's
