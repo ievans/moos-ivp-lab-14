@@ -175,6 +175,9 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
 	 }
        }
+
+       // Publish new map to coordinator
+       publishFuseComplete();
      }
      else if (key == "UHZ_CONFIG_ACK") {
        // Parse String
@@ -240,6 +243,12 @@ MarkerMap HandleSensorData::fuseMaps() {
 
   // Now newmap's _mines is a complete picture of the map state
   return newmap;
+}
+
+void HandleSensorData::publishFuseComplete() {
+  MarkerMap newmap = fuseMaps();
+  string out = newmap.toString();
+  m_Comms.Notify("FUSE_COMPLETE", out);
 }
 
 double getPriority(Uuo& mine) {

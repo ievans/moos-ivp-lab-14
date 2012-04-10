@@ -44,6 +44,7 @@ private:
    void installSensor(int,double,double,double);
    MarkerMap fuseMaps();
    void printHumanHazardFile(MarkerMap&);
+   void publishFuseComplete();
 
    string _vehicle_name;
    double _classify_min_time;
