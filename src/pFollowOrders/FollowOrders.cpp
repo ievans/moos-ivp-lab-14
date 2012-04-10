@@ -24,7 +24,7 @@ FollowOrders::~FollowOrders()
 {
 }
 
-#define SLAVE_ORDERS_NAME "SLAVES_ORDERS"
+#define SLAVE_ORDERS_STRING "READ_ORDERS"
 #define WAYPOINTS_UPDATE_NAME "UP_WPT_PTS"
 #define BEHAVIOR_UPDATE_NAME "//TODO"
 //---------------------------------------------------------
@@ -33,7 +33,7 @@ FollowOrders::~FollowOrders()
 void FollowOrders::UpdateWaypoints() {
         XYSegList my_seglist;
         for (int i = 0; i < allWaypoints.size(); i++) {
-            my_seglist.add_vertex(allWaypoints[i].x, allWaypoints[i].y);
+            my_seglist.add_vertex((double)allWaypoints[i].x, (double)allWaypoints[i].y);
         }
         string updates = "points = ";
         updates += my_seglist.get_spec();
@@ -71,7 +71,7 @@ bool FollowOrders::OnNewMail(MOOSMSG_LIST &NewMail)
    for(p=NewMail.begin(); p!=NewMail.end(); p++) {
       CMOOSMsg &msg = *p;
 
-      if (msg.GetKey() == SLAVE_ORDERS_NAME) {
+      if (msg.GetKey() == SLAVE_ORDERS_STRING) {
 	  string order = msg.GetString();
 	  this->processOrderString(order);
       }
@@ -121,6 +121,6 @@ bool FollowOrders::OnStartUp()
 
 void FollowOrders::RegisterVariables()
 {
-    m_Comms.Register(SLAVE_ORDERS_NAME, 0);
+    m_Comms.Register(SLAVE_ORDERS_STRING, 0);
 }
 

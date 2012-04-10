@@ -12,5 +12,6 @@ TARGET_LINK_LIBRARIES(pFollowOrders
    MOOSGen
    mbutil
    m
-   pthread)
+   pthread
+   geometry)
 

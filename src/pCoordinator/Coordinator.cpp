@@ -34,6 +34,8 @@ vector<Uuo> getNMostValuableUuos(int n) {
 
 #define LAWNMOW_BEHAVIOR_STRING "lawmow"
 #define WAYPOINT_BEHVIOR_STRING "waypoint"
+#define MASTER_ORDERS_STRING "READ_MASTER_ORDERS"
+#define SLAVE_ORDERS_STRING "READ_ORDERS"
 
 void Coordinator::stateTransition(GameState newState) {
     if (gameState == INITIAL && newState == ALL_LAWNMOW) {
@@ -65,12 +67,12 @@ void Coordinator::stateTransition(GameState newState) {
 
 void Coordinator::sendOrdersToMaster(vector<Order> orders) {
     for (int i = 0; i < orders.size(); i++) {
-	m_Comms.Notify("MASTER_ORDER", orders[i].toString());
+	m_Comms.Notify(MASTER_ORDERS_STRING, orders[i].toString());
     }
 }
 void Coordinator::sendOrdersToSlaves(vector<Order> orders) {
     for (int i = 0; i < orders.size(); i++) {
-	m_Comms.Notify("SLAVES_ORDER", orders[i].toString());
+	m_Comms.Notify(SLAVE_ORDERS_STRING, orders[i].toString());
     }
 }
 
