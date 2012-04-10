@@ -120,6 +120,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
      }
      else if (key == "HANDLE_SENSOR_MESSAGE") {
+       cout << "Got Message from other vehicle" << endl;
        parseStateMessage(msg.GetString());
      }
 
@@ -312,6 +313,18 @@ string HandleSensorData::printStateMessage() {
   return _map.toString();
 }
 
+void HandleSensorData::printHumanHazardFile(MarkerMap& map) {
+  std::map<int, Uuo>::iterator it;
+  ofstream outfile;
+  outfile.open("HazardOutput.txt");
+  for (it = map._mines.begin(); it != map._mines.end(); it++) {
+    outfile << "[" << it->second.id << "] = " << it->second.probHazard 
+	    << "    " << it->second.isHazard() << endl;
+  }
+  outfile.close();
+  return;
+}
+
 //---------------------------------------------------------
 // Procedure: Iterate()
 
@@ -322,13 +335,13 @@ bool HandleSensorData::Iterate()
   // run classify subroutine.  Handles time internally
   classifyUuos();
 
-  if (_iter_count == 200) {
+  if (_iter_count == 20) {
     // Constantly send state messages to other vehicle
     stringstream msg;
     msg << "src_node=" << tolower(_vehicle_name) 
 	<< ",dest_node=all,var_name=HANDLE_SENSOR_MESSAGE,string_val=\"" 
 	<< printStateMessage() << "\"";
-    //    m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
+        m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
     _msg_idx++;
     //    cout << "Trying to publish " << printStateMessage() << endl;
 
@@ -377,6 +390,8 @@ void HandleSensorData::generateHazardReport() {
 
   string out = set.getSpec();
   m_Comms.Notify("HAZARD_REPORT", out );
+
+  printHumanHazardFile(finalmap);
 }
 
 void HandleSensorData::installSensor(int width, double pd) {
@@ -531,7 +546,7 @@ void HandleSensorData::RegisterVariables()
   m_Comms.Register("UHZ_CONFIG_ACK", 0);
 
   if (_isPrimary) {
-    //    m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
+        m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
   }
 }
 

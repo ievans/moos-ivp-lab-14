@@ -41,7 +41,7 @@ ProcessConfig = uTimerScript_SensorConfig
   RESET_MAX  = 0
   CONDITION  = (NAV_SPEED > 0)
 
-  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=$(VNAME),width=50,pd=1.0", time=0.1
+  EVENT      = var=UHZ_CONFIG_REQUEST, val="vname=$(VNAME),width=25,pd=0.9", time=0.1
 }
   
 //------------------------------------------

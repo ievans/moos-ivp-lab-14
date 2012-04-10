@@ -32,8 +32,10 @@ Behavior = BHV_Waypoint
    slip_radius = 15.0
           lead = 15
 
-        points = format=lawnmower, label=initSweep, x=-12.5, y=-237.5, height=325, width=225, lane_width=90, rows=north-south, degs=0
-
+//        points = format=lawnmower, label=initSweep, x=-12.5, y=-237.5, height=325, width=225, lane_width=90, rows=north-south, degs=0
+  
+// Full area lawnmow
+  points = format=lawnmower, label=initSweep, x=125, y=-237.5, height=325, width=550, lane_width=50, rows=north-south, degs=0
 
   repeat = 0
   visual_hints = nextpt_color=red, nextpt_lcolor=green
