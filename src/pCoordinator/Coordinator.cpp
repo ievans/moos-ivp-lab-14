@@ -5,10 +5,15 @@
 /*    DATE: April 5, 2012                                   */
 /************************************************************/
 
-#define FUSE_COMPLETE_MESSAGE_NAME "FUSE_COMPLETE"
 
 #include <iterator>
 #include "Coordinator.h"
+
+#define FUSE_COMPLETE_MESSAGE_NAME "FUSE_COMPLETE"
+#define LAWNMOW_BEHAVIOR_STRING "lawmow"
+#define WAYPOINT_BEHVIOR_STRING "waypoint"
+#define MASTER_ORDERS_STRING "READ_MASTER_ORDERS"
+#define SLAVE_ORDERS_STRING "READ_ORDERS"
 
 using namespace std;
 
@@ -18,6 +23,7 @@ using namespace std;
 Coordinator::Coordinator()
 {
     gameState = GS_INITIAL;
+    myMap = MarkerMap();
 }
 
 //---------------------------------------------------------
@@ -32,11 +38,6 @@ vector<Uuo> getNMostValuableUuos(int n) {
     return topN;
 }
 
-#define LAWNMOW_BEHAVIOR_STRING "lawmow"
-#define WAYPOINT_BEHVIOR_STRING "waypoint"
-#define MASTER_ORDERS_STRING "READ_MASTER_ORDERS"
-#define SLAVE_ORDERS_STRING "READ_ORDERS"
-
 void Coordinator::stateTransition(int newState) {
     cout << "moving to " << newState << endl;
 
@@ -44,7 +45,6 @@ void Coordinator::stateTransition(int newState) {
 	BehaviorOrder lawnmow = BehaviorOrder(LAWNMOW_BEHAVIOR_STRING);
 	vector<string> orders;
 	orders.push_back(lawnmow.toString());
-	sendOrdersTo(orders, MASTER_ORDERS_STRING);
 	sendOrdersTo(orders, MASTER_ORDERS_STRING);
     } else if (gameState == GS_ALL_LAWNMOW && newState == GS_LAWNMOW_AND_INSPECT) {
 	// keep the master in lawmow mode
@@ -84,10 +84,10 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
       CMOOSMsg &msg = *p;
 
       if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME) {
-	  string map = msg.GetString();
-	  this->stateTransition(GS_ALL_LAWNMOW);
+	  string mapString = msg.GetString();
+	  cout << " got MAP " << mapString << endl;
+	  myMap = MarkerMap(mapString);
       }
-
    }
 	
    return(true);

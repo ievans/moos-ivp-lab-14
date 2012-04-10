@@ -50,6 +50,7 @@ class Coordinator : public CMOOSApp
 private:
    int gameState;
    double startMOOSTime;
+   MarkerMap myMap;
 };
 
 #endif 

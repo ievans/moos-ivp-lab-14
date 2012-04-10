@@ -31,14 +31,14 @@ FollowOrders::~FollowOrders()
 // Procedure: OnNewMail
 
 void FollowOrders::UpdateWaypoints() {
-        XYSegList my_seglist;
-        for (int i = 0; i < allWaypoints.size(); i++) {
-            my_seglist.add_vertex((double)allWaypoints[i].x, (double)allWaypoints[i].y);
-        }
-        string updates = "points = ";
-        updates += my_seglist.get_spec();
-        cout << "sent: " << updates << " from " << this->GetAppName() << endl;
-	m_Comms.Notify(WAYPOINTS_UPDATE_NAME, updates);
+    XYSegList my_seglist;
+    for (int i = 0; i < allWaypoints.size(); i++) {
+	my_seglist.add_vertex((double)allWaypoints[i].x, (double)allWaypoints[i].y);
+    }
+    string updates = "points = ";
+    updates += my_seglist.get_spec();
+    cout << "sent: " << updates << " from " << this->GetAppName() << endl;
+    m_Comms.Notify(WAYPOINTS_UPDATE_NAME, updates);
 }
 
 void FollowOrders::processOrderString(string orderS) { 
@@ -58,7 +58,7 @@ void FollowOrders::processOrderString(string orderS) {
 	break;
     }
     default: {
-	cout << "Unrecognized order type! Int: " << ot.orderType << endl;
+	cout << "Unrecognized order type! int type: " << ot.orderType << endl;
     }
     }
 
