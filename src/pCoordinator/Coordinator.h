@@ -25,11 +25,9 @@
 #include "../shared/UUO.h"
 #include "../shared/MarkerMap.h"
 
-enum GameState { 
-    INITIAL,
-    ALL_LAWNMOW,
-    LAWNMOW_AND_INSPECT,
- };
+#define GS_INITIAL 0
+#define GS_ALL_LAWNMOW 1
+#define GS_LAWNMOW_AND_INSPECT 2
 
 class Coordinator : public CMOOSApp
 {
@@ -44,13 +42,14 @@ class Coordinator : public CMOOSApp
    bool OnStartUp();
    void RegisterVariables();
 
-   void stateTransition(GameState gs);
-   void sendOrdersToSlaves(vector<Order> orders);
-   void sendOrdersToMaster(vector<Order> orders);
+   void stateTransition(int newState);
+   void sendOrdersTo(vector<string> orders, string to);
+
    vector<Uuo> getNMostValuableUuos(int n);
 
 private:
-   GameState gameState;
+   int gameState;
+   double startMOOSTime;
 };
 
 #endif 

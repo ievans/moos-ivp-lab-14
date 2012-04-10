@@ -24,7 +24,7 @@ public:
 class Order {
 public:
     int type;
-    string toString() {
+    string toTypeString() {
 	stringstream s;
 	s << type;
 	return s.str();
@@ -42,7 +42,7 @@ public:
     WaypointOrder(Point2D w) { type = OrderType::WAYPOINT_ORDER; waypoint = w; };
 
     string toString() { 
-	return Order::toString() + SEPARATOR + waypoint.toString();
+	return Order::toTypeString() + SEPARATOR + waypoint.toString();
     };
 
     void fromString(string s) {
@@ -58,7 +58,7 @@ public:
     BehaviorOrder(string behaviorString) { type = OrderType::BEHAVIOR_ORDER; newBehavior = behaviorString; }
 
     string toString() {
-	return Order::toString() + SEPARATOR + newBehavior;
+	return Order::toTypeString() + SEPARATOR + newBehavior;
     };
 };
 

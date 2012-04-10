@@ -26,7 +26,7 @@ FollowOrders::~FollowOrders()
 
 #define SLAVE_ORDERS_STRING "READ_ORDERS"
 #define WAYPOINTS_UPDATE_NAME "UP_WPT_PTS"
-#define BEHAVIOR_UPDATE_NAME "//TODO"
+#define BEHAVIOR_UPDATE_NAME "COORDMODE"
 //---------------------------------------------------------
 // Procedure: OnNewMail
 

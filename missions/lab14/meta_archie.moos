@@ -28,6 +28,8 @@ Processconfig = ANTLER
   Run = pHandleSensorData @ NewConsole = false
   Run = uXMS             @ NewConsole = true
   Run = uFldMessageHandler @ NewConsole = false
+  Run = pCoordinator	   @ NewConsole = true
+  Run = pFollowOrders	   @ NewConsole = true
 }
 
 #include "plug_pHandleSensorData.moos"

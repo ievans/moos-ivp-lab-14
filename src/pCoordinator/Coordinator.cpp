@@ -17,7 +17,7 @@ using namespace std;
 
 Coordinator::Coordinator()
 {
-    gameState = INITIAL;
+    gameState = GS_INITIAL;
 }
 
 //---------------------------------------------------------
@@ -37,42 +37,39 @@ vector<Uuo> getNMostValuableUuos(int n) {
 #define MASTER_ORDERS_STRING "READ_MASTER_ORDERS"
 #define SLAVE_ORDERS_STRING "READ_ORDERS"
 
-void Coordinator::stateTransition(GameState newState) {
-    if (gameState == INITIAL && newState == ALL_LAWNMOW) {
+void Coordinator::stateTransition(int newState) {
+    cout << "moving to " << newState << endl;
+
+    if (gameState == GS_INITIAL && newState == GS_ALL_LAWNMOW) {
 	BehaviorOrder lawnmow = BehaviorOrder(LAWNMOW_BEHAVIOR_STRING);
-	vector<Order> orders;
-	orders.push_back(lawnmow);
-	sendOrdersToMaster(orders);
-	sendOrdersToSlaves(orders);
-    } else if (gameState == ALL_LAWNMOW && newState == LAWNMOW_AND_INSPECT) {
+	vector<string> orders;
+	orders.push_back(lawnmow.toString());
+	sendOrdersTo(orders, MASTER_ORDERS_STRING);
+	sendOrdersTo(orders, MASTER_ORDERS_STRING);
+    } else if (gameState == GS_ALL_LAWNMOW && newState == GS_LAWNMOW_AND_INSPECT) {
 	// keep the master in lawmow mode
 	BehaviorOrder lawnmow = BehaviorOrder(LAWNMOW_BEHAVIOR_STRING);
-	vector<Order> orders;
-	orders.push_back(lawnmow);
-	sendOrdersToMaster(orders);
+	vector<string> orders;
+	orders.push_back(lawnmow.toString());
+	sendOrdersTo(orders, MASTER_ORDERS_STRING);
 
-	vector<Order> slaveOrders;
+	vector<string> slaveOrders;
 	BehaviorOrder wpb = BehaviorOrder(WAYPOINT_BEHVIOR_STRING);
-	slaveOrders.push_back(wpb);
+	slaveOrders.push_back(wpb.toString());
 
 	// generate waypoint behaviors for the slave
 	WaypointOrder wp = WaypointOrder(Point2D(0, 0));
-	slaveOrders.push_back(wp);
+	slaveOrders.push_back(wp.toString());
 
-	sendOrdersToSlaves(slaveOrders);
+	sendOrdersTo(slaveOrders, SLAVE_ORDERS_STRING);
     }
-
-    gameState == newState;
+    gameState = newState;
 }
 
-void Coordinator::sendOrdersToMaster(vector<Order> orders) {
+void Coordinator::sendOrdersTo(vector<string> orders, string target) {
     for (int i = 0; i < orders.size(); i++) {
-	m_Comms.Notify(MASTER_ORDERS_STRING, orders[i].toString());
-    }
-}
-void Coordinator::sendOrdersToSlaves(vector<Order> orders) {
-    for (int i = 0; i < orders.size(); i++) {
-	m_Comms.Notify(SLAVE_ORDERS_STRING, orders[i].toString());
+	cout << "sent orders to " << target << " , orders: " <<  orders[i] << endl;
+	m_Comms.Notify(target, orders[i]);
     }
 }
 
@@ -88,7 +85,7 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
 
       if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME) {
 	  string map = msg.GetString();
-	  this->stateTransition(ALL_LAWNMOW);
+	  this->stateTransition(GS_ALL_LAWNMOW);
       }
 
    }
@@ -120,8 +117,18 @@ bool Coordinator::Iterate()
    // check the marker map. how many blocks have been found? 
    // should we change out of lawnmow behavior to the waypoint 
     // search + rendezvous state?
-    if (MOOSTime() > 500) {
-	this->stateTransition(LAWNMOW_AND_INSPECT);
+    if (MOOSTime() - startMOOSTime > 0) {
+	if (gameState == GS_INITIAL) {
+	    cout << "making state transition to all lawnmow" << endl;
+	    this->stateTransition(GS_ALL_LAWNMOW);
+	}
+    }
+
+    if (MOOSTime() - startMOOSTime > 500) {
+	if (gameState == GS_ALL_LAWNMOW) {
+	    cout << "making state transition to lawnmow and inspect" << endl;
+	    this->stateTransition(GS_LAWNMOW_AND_INSPECT);
+	}
     }
 
    return(true);
@@ -132,7 +139,8 @@ bool Coordinator::Iterate()
 
 bool Coordinator::OnStartUp()
 {
-   // happens before connection is open
+   // happens before connection is open. important: CANNOT work in constructor
+   startMOOSTime = MOOSTime();
 
    RegisterVariables();	
    return(true);
