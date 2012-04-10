@@ -20,8 +20,6 @@ public:
 
   MarkerMap(string encodedMM) { this->fromString(encodedMM); };
 
-  
-
   string toString() {
     // TODO:  Compress later
     // Message format:
@@ -32,7 +30,7 @@ public:
     map<int, Uuo>::iterator it;
 
     if (_mines.begin() == _mines.end()) {
-      msg << "NONE";
+      msg << "";
     }
     else {
       it = _mines.begin();
@@ -57,7 +55,7 @@ public:
   void fromStringToOther(string encodedMM) {
     Uuo mine;
     map<int,Uuo>::iterator it;
-    vector<string> strvect = parseString(encodedMM,":");
+    vector<string> strvect = parseString(encodedMM, ":");
     for (int i = 0; i < strvect.size(); i++) {
 
       Uuo newMine;
@@ -162,7 +160,6 @@ public:
   };
 
   double getPriorityMineIndex() {
-      //    cout << "Trying to Classify Something" << endl;
       // find highest priority point
       // TODO: What is highest priority???
       map<int, Uuo>::iterator it;

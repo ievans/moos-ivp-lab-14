@@ -9,6 +9,8 @@
 #include <iterator>
 #include "Coordinator.h"
 
+#include <assert.h>
+
 #define FUSE_COMPLETE_MESSAGE_NAME "FUSE_COMPLETE"
 #define LAWNMOW_BEHAVIOR_STRING "lawmow"
 #define WAYPOINT_BEHVIOR_STRING "waypoint"
@@ -24,6 +26,7 @@ Coordinator::Coordinator()
 {
     gameState = GS_INITIAL;
     myMap = MarkerMap();
+    this->TestAll();
 }
 
 //---------------------------------------------------------
@@ -58,8 +61,24 @@ void Coordinator::stateTransition(int newState) {
 	slaveOrders.push_back(wpb.toString());
 
 	// generate waypoint behaviors for the slave
-	WaypointOrder wp = WaypointOrder(Point2D(0, 0));
-	slaveOrders.push_back(wp.toString());
+	// read the top N most important points to classify, tell it to go
+	// look at them
+ 
+        // make a copy of myMap so we can destructively pop things
+	MarkerMap mm = MarkerMap(myMap.toString()); // conveniently test serialization
+
+	for (int i = 0; i < 5; i++) {
+	    Uuo mine = mm._mines[mm.getPriorityMineIndex()];
+	    
+            // create an order to go to this mine
+	    WaypointOrder wp = WaypointOrder(Point2D(mine.x, mine.y));
+	    slaveOrders.push_back(wp.toString());
+
+	    // remove the mine from the myMap copy
+	    map<int,Uuo>::iterator it;
+	    it = mm._mines.find(mine.id);
+	    mm._mines.erase(it);
+	}
 
 	sendOrdersTo(slaveOrders, SLAVE_ORDERS_STRING);
     }
@@ -154,3 +173,44 @@ void Coordinator::RegisterVariables()
     m_Comms.Register(FUSE_COMPLETE_MESSAGE_NAME, 0);
 }
 
+void Coordinator::TestAll() {
+    cout << "Testing Point2D...";
+    Point2D p = Point2D(03235, 23281, 2372);
+    Point2D q = Point2D(p.toString());
+    assert(p.x == q.x && p.y == q.y && p.id == q.id);
+    q = Point2D(03235, 23281, "2372");
+    assert(p.x == q.x && p.y == q.y && p.id == q.id);
+    cout << "ok" << endl;
+
+//    cout << "Testing UUO" << endl;
+//    Uuo u = new Uuo();
+
+    cout << "Testing BehaviorOrder...";
+    BehaviorOrder bo = BehaviorOrder("foobar");
+    BehaviorOrder bo2 = BehaviorOrder("nadda");
+    bo2.fromString(bo.toString());
+    assert(bo2.toString() == bo.toString());
+    cout << "ok" << endl;
+
+    cout << "Testing WaypointOrder...";
+    WaypointOrder wo = WaypointOrder(Point2D(32, 23, 101));
+    WaypointOrder wo2 = WaypointOrder(Point2D(-1, -1, -1));
+    wo2.fromString(wo.toString());
+    assert(wo.toString() == wo2.toString());
+    cout << "ok" << endl;
+
+    cout << "Testing MarkerMap...";
+    MarkerMap m = MarkerMap();
+    assert(m.toString() == "");
+    m._mines.insert(pair<int,Uuo>(1, Uuo()));
+    m._mines.insert(pair<int,Uuo>(1337, Uuo()));
+    m._mines.insert(pair<int,Uuo>(-238, Uuo()));
+    m._mines.insert(pair<int,Uuo>(3282, Uuo()));
+    m._mines.insert(pair<int,Uuo>(0, Uuo()));
+    MarkerMap m2 = MarkerMap(m.toString());
+    cout << "A: " << m.toString() << endl; cout << "B: " << m2.toString() << endl;
+
+    assert(m.toString() == m2.toString());
+
+    cout << "ok" << endl;
+}

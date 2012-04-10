@@ -46,6 +46,7 @@ class Coordinator : public CMOOSApp
    void sendOrdersTo(vector<string> orders, string to);
 
    vector<Uuo> getNMostValuableUuos(int n);
+   void TestAll();
 
 private:
    int gameState;

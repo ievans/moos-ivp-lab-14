@@ -60,6 +60,12 @@ public:
     string toString() {
 	return Order::toTypeString() + SEPARATOR + newBehavior;
     };
+
+    string fromString(string s) {
+	vector<string> svector = parseString(s, SEPARATOR);
+	newBehavior = svector[1];
+    }
+
 };
 
 #endif
