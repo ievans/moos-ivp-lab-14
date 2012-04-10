@@ -251,43 +251,10 @@ void HandleSensorData::publishFuseComplete() {
   m_Comms.Notify("FUSE_COMPLETE", out);
 }
 
-double getPriority(Uuo& mine) {
-  // Assume triangle priority.  zero at hazProb = {0,1} and
-  // one at hazProb = {PRIOR_PROB}
-  // Biases towards points nearest default
-  // However, also bias toward low label numbers
-  double priority;
-  if (mine.probHazard < PRIOR_PROB) {
-    priority = 1.0/PRIOR_PROB * mine.probHazard;
-  }
-  else {
-    // point slope formulation
-    priority = 1 + -1.0/(1-PRIOR_PROB) * (mine.probHazard - PRIOR_PROB);
-  }
-
-  return priority;
-}
-
 void HandleSensorData::classifyUuos() {
   if (MOOSTime() - _classifyTime > _classify_min_time) {
-    //    cout << "Trying to Classify Something" << endl;
-    // find highest priority point
-    // TODO: What is highest priority???
-    map<int, Uuo>::iterator it;
-    double best_idx = -1;
-    double best_priority = -1;
-
-    // TODO: Linear search sux
-    for (it = _map._mines.begin(); it != _map._mines.end(); it++) {
-      if (it->second.classifyCount > 0) {
-	if (getPriority(it->second) > best_priority) {
-	  best_idx = it->second.id;
-	  best_priority = getPriority(it->second);
-	}
-      }
-    }
-
     //    cout << "Best idx was " << best_idx << endl;
+    double best_idx = _map.getPriorityMineIndex();
     if (best_idx > -1) {
       _map._mines[best_idx].classifyCount--;
       // Post request

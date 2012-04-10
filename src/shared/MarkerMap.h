@@ -20,6 +20,8 @@ public:
 
   MarkerMap(string encodedMM) { this->fromString(encodedMM); };
 
+  
+
   string toString() {
     // TODO:  Compress later
     // Message format:
@@ -142,10 +144,43 @@ public:
     }
   };
 
-    void fuseFromString(string encodedMM) {
-// TODO
-    };
+  static double getPriority(Uuo& mine) {
+      // Assume triangle priority.  zero at hazProb = {0,1} and
+      // one at hazProb = {PRIOR_PROB}
+      // Biases towards points nearest default
+      // However, also bias toward low label numbers
+      double priority;
+      if (mine.probHazard < PRIOR_PROB) {
+	  priority = 1.0/PRIOR_PROB * mine.probHazard;
+      }
+      else {
+	  // point slope formulation
+	  priority = 1 + -1.0/(1-PRIOR_PROB) * (mine.probHazard - PRIOR_PROB);
+      }
 
-};
+      return priority;
+  };
+
+  double getPriorityMineIndex() {
+      //    cout << "Trying to Classify Something" << endl;
+      // find highest priority point
+      // TODO: What is highest priority???
+      map<int, Uuo>::iterator it;
+      double best_idx = -1;
+      double best_priority = -1;
+
+      // TODO: Linear search sux
+      for (it = _mines.begin(); it != _mines.end(); it++) {
+	  if (it->second.classifyCount > 0) {
+	      if (MarkerMap::getPriority(it->second) > best_priority) {
+		  best_idx = it->second.id;
+		  best_priority = MarkerMap::getPriority(it->second);
+	      }
+	  }
+      }
+      return best_idx;
+  }
+
+}; // end class definition
 
 #endif
