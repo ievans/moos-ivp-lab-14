@@ -162,6 +162,10 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	   // add new sighting to map
 	   newMine.classifyCount = 1;
 	   _map._mines.insert(pair<int,Uuo>(label,newMine));
+	   // Apply the measurement with bayes
+	   it = _map._mines.find(label);
+	   double haz = it->second.probHazard;
+	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
 	 }
 	 else {
 	   it->second.classifyCount++;
@@ -211,6 +215,30 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
 void HandleSensorData::parseStateMessage(string msg) {
   _map.fromStringToOther(msg);
+}
+
+// does a bayesian fusion on this vehicle's map and the other vehicle's
+// map copy stored int _map._mines_other
+MarkerMap HandleSensorData::fuseMaps() {
+  // Key insight is that every bayes update is just multiplicative, 
+  // therefore, we just have to multiply the two probabilities together
+  // and divide by the double-counted prior
+
+  map<int, Uuo>::iterator it_m, it_other;
+  MarkerMap newmap = _map;
+  for (it_other = newmap._mines_other.begin(); it_other != newmap._mines_other.end(); it_other++) {
+    it_m = newmap._mines.find(it_other->second.id);
+    if (it_m == newmap._mines.end()) {
+      newmap._mines.insert(*it_other);
+    }
+    else {
+      // integrate the two sets of measurements
+      it_m->second.probHazard = it_m->second.probHazard * it_other->second.probHazard / PRIOR_PROB;
+    }
+  }
+
+  // Now newmap's _mines is a complete picture of the map state
+  return newmap;
 }
 
 double getPriority(Uuo& mine) {
@@ -329,10 +357,14 @@ bool HandleSensorData::Iterate()
 
 void HandleSensorData::generateHazardReport() {
   // Generate and publish a hazard report
+
+  // first fuse both copies of maps
+  MarkerMap finalmap = fuseMaps();
+
   map<int, Uuo>::iterator it;
   XYHazardSet set;
   set.setSource(tolower(_vehicle_name));
-  for (it = _map._mines.begin(); it != _map._mines.end(); it++) {
+  for (it = finalmap._mines.begin(); it != finalmap._mines.end(); it++) {
     string type;
     if (it->second.isHazard()) {
       type = "hazard";

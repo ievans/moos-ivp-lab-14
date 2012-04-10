@@ -29,7 +29,7 @@ public:
 
     bool isHazard() {
 	// Todo: Be smarter!
-	if (probHazard > 0.75) {
+	if (probHazard > 0.9) {
 	    return true;
 	}
 	else {
