@@ -224,9 +224,7 @@ void HandleSensorData::parseStateMessage(string msg) {
 // does a bayesian fusion on this vehicle's map and the other vehicle's
 // map copy stored int _map._mines_other
 MarkerMap HandleSensorData::fuseMaps() {
-  // Key insight is that every bayes update is just multiplicative, 
-  // therefore, we just have to multiply the two probabilities together
-  // and divide by the double-counted prior
+  // Ask Rob to type up the bayes math.
 
   map<int, Uuo>::iterator it_m, it_other;
   MarkerMap newmap = _localMap;
@@ -237,7 +235,9 @@ MarkerMap HandleSensorData::fuseMaps() {
     }
     else {
       // integrate the two sets of measurements
-      it_m->second.probHazard = it_m->second.probHazard * it_other->second.probHazard / PRIOR_PROB;
+      double Pa = it_m->second.probHazard;
+      double Pb = it_other->second.probHazard;
+      it_m->second.probHazard = (Pa*Pb/PRIOR_PROB) / ( (Pa*Pb/PRIOR_PROB) + ((1-Pa)*(1-Pb)/(1-PRIOR_PROB)) );
     }
   }
 
