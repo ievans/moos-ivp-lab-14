@@ -92,9 +92,11 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 double haz = it->second.probHazard;
 	 if (hazard) {
 	   it->second.probHazard = (_Pc*haz) / (_Pc*haz + (1-_Pc)*(1-haz));
+	   it->second.m_hist = it->second.m_hist + "+";
 	 }
 	 else {
 	   it->second.probHazard = ( (1-_Pc)*haz ) / ( (1-_Pc)*haz + _Pc*(1-haz) );
+	   it->second.m_hist = it->second.m_hist + "-";
 	 }
 
 	 //m_Comms.Notify("LOCAL_SENSOR_MESSAGE", printStateMessage());
@@ -156,6 +158,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 newMine.x = x;
 	 newMine.y = y;
 	 newMine.id = label;
+	 newMine.m_hist = ".";
 	 map<int, Uuo>::iterator it;
 
 	 it = _localMap._map.find(label);
@@ -170,6 +173,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 }
 	 else {
 	   it->second.classifyCount++;
+	   it->second.m_hist = it->second.m_hist + ".";
 	   // do bayesian update
 	   double haz = it->second.probHazard;
 	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
@@ -238,6 +242,7 @@ MarkerMap HandleSensorData::fuseMaps() {
       double Pa = it_m->second.probHazard;
       double Pb = it_other->second.probHazard;
       it_m->second.probHazard = (Pa*Pb/PRIOR_PROB) / ( (Pa*Pb/PRIOR_PROB) + ((1-Pa)*(1-Pb)/(1-PRIOR_PROB)) );
+      it_m->second.m_hist = it_m->second.m_hist + it_other->second.m_hist;
     }
   }
 
@@ -295,7 +300,8 @@ void HandleSensorData::printHumanHazardFile(MarkerMap& map) {
   outfile.open("HazardOutput.txt");
   for (it = map._map.begin(); it != map._map.end(); it++) {
     outfile << "[" << it->second.id << "] = " << it->second.probHazard 
-	    << "    " << it->second.isHazard() << endl;
+	    << "\t" << it->second.isHazard() << "\t" 
+	    << it->second.m_hist << endl;
   }
   outfile.close();
   return;
@@ -332,6 +338,9 @@ bool HandleSensorData::Iterate()
     //    cout << "_lockout = " << _lockout << endl;
     //    cout << "Timing: " << MOOSTime() << " - " << _starttime
     //	 << " <> " << _endtime << endl;
+
+    MarkerMap newmap = fuseMaps();
+    printHumanHazardFile(newmap);
   }
 
   if (_isPrimary && !_lockout && MOOSTime() - _starttime > _endtime) {

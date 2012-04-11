@@ -93,16 +93,16 @@ public:
 
     static double getPriority(Uuo& mine) {
 	// Assume triangle priority.  zero at hazProb = {0,1} and
-	// one at hazProb = {PRIOR_PROB}
-	// Biases towards points nearest default
+	// one at hazProb = 0.5
+	// Biases towards points nearest uncertainty
 	// However, also bias toward low label numbers
 	double priority;
-	if (mine.probHazard < PRIOR_PROB) {
-	    priority = 1.0/PRIOR_PROB * mine.probHazard;
+	if (mine.probHazard < PRIORITY_MAX) {
+	    priority = 1.0/PRIORITY_MAX * mine.probHazard;
 	}
 	else {
 	    // point slope formulation
-	    priority = 1 + -1.0/(1-PRIOR_PROB) * (mine.probHazard - PRIOR_PROB);
+	    priority = 1 + -1.0/(1-PRIORITY_MAX) * (mine.probHazard - PRIORITY_MAX);
 	}
 
 	return priority;

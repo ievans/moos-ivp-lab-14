@@ -4,6 +4,7 @@
 #include <queue>
 
 #define PRIOR_PROB 0.10
+#define PRIORITY_MAX .294 // chosen by expected score decision line
 
 using namespace std;
 
@@ -14,6 +15,7 @@ public:
     int id;
     double probHazard;
     int classifyCount; // remaining times to classify object
+    string m_hist; // string representing measurement history
     // Todo: raw sightings from vehicles
 
     Uuo () {
@@ -29,7 +31,7 @@ public:
 
     bool isHazard() {
 	// Todo: Be smarter!
-	if (probHazard > 0.9) {
+	if (probHazard > PRIORITY_MAX) {
 	    return true;
 	}
 	else {

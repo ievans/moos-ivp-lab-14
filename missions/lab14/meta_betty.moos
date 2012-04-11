@@ -46,7 +46,7 @@ ProcessConfig = pHandleSensorData
   VEHICLE_NAME = $(VNAME)
   SET_PRIMARY = TRUE
   CLASSIFY_MIN_TIME = 30.0
-  HAZARD_REPORT_TIME = 5000.0
+  HAZARD_REPORT_TIME = 3000.0
 }
 
 //------------------------------------------

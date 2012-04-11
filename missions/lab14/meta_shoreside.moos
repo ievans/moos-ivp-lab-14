@@ -19,7 +19,7 @@ Processconfig = ANTLER
 //  Run = pLogger           @ NewConsole = false
   Run = pHostInfo         @ NewConsole = true
   Run = uFldShoreBroker   @ NewConsole = true
-  Run = uFldNodeComms     @ NewConsole = true
+  Run = uFldNodeComms     @ NewConsole = false
   Run = uFldHazardSensor  @ NewConsole = false
   Run = uXMS              @ NewConsole = true
 }
