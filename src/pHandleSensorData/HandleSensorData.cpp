@@ -83,8 +83,8 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 // We will always have this in our database already for
 	 // a classification:
 	 map<int, Uuo>::iterator it;
-	 it = _map._mines.find(label);
-	 if (it == _map._mines.end()) {
+	 it = _localMap._map.find(label);
+	 if (it == _localMap._map.end()) {
 	   cout << "ERROR!  classification uuo not found!" << endl;
 	 }
 
@@ -158,13 +158,13 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 newMine.id = label;
 	 map<int, Uuo>::iterator it;
 
-	 it = _map._mines.find(label);
-	 if (it == _map._mines.end()) {
+	 it = _localMap._map.find(label);
+	 if (it == _localMap._map.end()) {
 	   // add new sighting to map
 	   newMine.classifyCount = 1;
-	   _map._mines.insert(pair<int,Uuo>(label,newMine));
+	   _localMap._map.insert(pair<int,Uuo>(label,newMine));
 	   // Apply the measurement with bayes
-	   it = _map._mines.find(label);
+	   it = _localMap._map.find(label);
 	   double haz = it->second.probHazard;
 	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
 	 }
@@ -218,7 +218,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 }
 
 void HandleSensorData::parseStateMessage(string msg) {
-    _map.fromString(msg, true);
+    _otherMap.fromString(msg);
 }
 
 // does a bayesian fusion on this vehicle's map and the other vehicle's
@@ -229,11 +229,11 @@ MarkerMap HandleSensorData::fuseMaps() {
   // and divide by the double-counted prior
 
   map<int, Uuo>::iterator it_m, it_other;
-  MarkerMap newmap = _map;
-  for (it_other = newmap._mines_other.begin(); it_other != newmap._mines_other.end(); it_other++) {
-    it_m = newmap._mines.find(it_other->second.id);
-    if (it_m == newmap._mines.end()) {
-      newmap._mines.insert(*it_other);
+  MarkerMap newmap = _localMap;
+  for (it_other = _otherMap._map.begin(); it_other != _otherMap._map.end(); it_other++) {
+    it_m = newmap._map.find(it_other->second.id);
+    if (it_m == newmap._map.end()) {
+      newmap._map.insert(*it_other);
     }
     else {
       // integrate the two sets of measurements
@@ -254,9 +254,9 @@ void HandleSensorData::publishFuseComplete() {
 void HandleSensorData::classifyUuos() {
   if (MOOSTime() - _classifyTime > _classify_min_time) {
     //    cout << "Best idx was " << best_idx << endl;
-    double best_idx = _map.getPriorityMineIndex();
+    double best_idx = _localMap.getPriorityMineIndex();
     if (best_idx > -1) {
-      _map._mines[best_idx].classifyCount--;
+      _localMap._map[best_idx].classifyCount--;
       // Post request
       stringstream s;
       s << "vname=" << tolower(_vehicle_name) << ",label="
@@ -286,14 +286,14 @@ bool HandleSensorData::OnConnectToServer()
 }
 
 string HandleSensorData::printStateMessage() {
-  return _map.toString();
+  return _localMap.toString();
 }
 
 void HandleSensorData::printHumanHazardFile(MarkerMap& map) {
   std::map<int, Uuo>::iterator it;
   ofstream outfile;
   outfile.open("HazardOutput.txt");
-  for (it = map._mines.begin(); it != map._mines.end(); it++) {
+  for (it = map._map.begin(); it != map._map.end(); it++) {
     outfile << "[" << it->second.id << "] = " << it->second.probHazard 
 	    << "    " << it->second.isHazard() << endl;
   }
@@ -353,7 +353,7 @@ void HandleSensorData::generateHazardReport() {
   map<int, Uuo>::iterator it;
   XYHazardSet set;
   set.setSource(tolower(_vehicle_name));
-  for (it = finalmap._mines.begin(); it != finalmap._mines.end(); it++) {
+  for (it = finalmap._map.begin(); it != finalmap._map.end(); it++) {
     string type;
     if (it->second.isHazard()) {
       type = "hazard";
@@ -521,8 +521,8 @@ void HandleSensorData::RegisterVariables()
   //  m_Comms.Register("ALL_DONE", 0);
   m_Comms.Register("UHZ_CONFIG_ACK", 0);
 
-  if (_isPrimary) {
+  //  if (_isPrimary) {
         m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
-  }
+	//  }
 }
 

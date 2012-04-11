@@ -12,13 +12,13 @@
 
 class MarkerMap {
 public:
-    std::map<int, Uuo> _mines;
-    std::map<int, Uuo> _mines_other;
+  // node id, node object
+    std::map<int, Uuo> _map;
 
     MarkerMap() {
     };
 
-    MarkerMap(string encodedMM) { this->fromString(encodedMM, false); };
+    MarkerMap(string encodedMM) { this->fromString(encodedMM); };
 
     string toString() {
 	// TODO:  Compress later
@@ -29,18 +29,18 @@ public:
 	stringstream msg;
 	map<int, Uuo>::iterator it;
 
-	if (_mines.begin() == _mines.end()) {
+	if (_map.begin() == _map.end()) {
 	    msg << "";
 	}
 	else {
-	    it = _mines.begin();
+	    it = _map.begin();
 	    msg << "id=" << it->second.id << "," 
 		<< "x=" << it->second.x << "," 
 		<< "y=" << it->second.y << ","
 		<< "pH=" << it->second.probHazard << "," 
 		<< "cc=" << it->second.classifyCount;
 
-	    for (it++; it != _mines.end(); it++) {
+	    for (it++; it != _map.end(); it++) {
 		msg << ":" << "id=" << it->second.id << "," 
 		    << "x=" << it->second.x << "," 
 		    << "y=" << it->second.y << ","
@@ -52,17 +52,12 @@ public:
 	return msg.str();
     };
   
-    void fromString(string encodedMM, bool intoOther) {
-	map<int,Uuo> target;
-	if (intoOther) 
-	    target = _mines_other;
-	else 
-	    target = _mines;
-	  
-	Uuo mine;
-	map<int,Uuo>::iterator it;
-	vector<string> strvect = parseString(encodedMM,":");
-	for (int i = 0; i < strvect.size(); i++) {
+    void fromString(string encodedMM) {
+      // WARNING!  THIS WILL OVERWRITE EXISTING MAP!
+      _map.clear();
+      map<int,Uuo>::iterator it;
+      vector<string> strvect = parseString(encodedMM,":");
+      for (int i = 0; i < strvect.size(); i++) {
 
 	    Uuo newMine;
 	    vector<string> in = parseString(strvect[i],",");
@@ -87,14 +82,7 @@ public:
 	    }
 
 	    if (newMine.isInitialized()) {
-		// integrate new mine
-		it = target.find(newMine.id);
-		if (it == target.end()) {
-		    target.insert( pair<int,Uuo>(newMine.id,newMine) );
-		}
-		else {
-		    it->second = newMine;
-		}
+		    _map.insert( pair<int,Uuo>(newMine.id,newMine) );
 	    }
 	    else {
 		cout << "Invalid mine message received:" << endl;
@@ -128,7 +116,7 @@ public:
 	double best_priority = -1;
 
 	// TODO: Linear search sux
-	for (it = _mines.begin(); it != _mines.end(); it++) {
+	for (it = _map.begin(); it != _map.end(); it++) {
 	    if (it->second.classifyCount > 0) {
 		if (MarkerMap::getPriority(it->second) > best_priority) {
 		    best_idx = it->second.id;

@@ -68,7 +68,7 @@ void Coordinator::stateTransition(int newState) {
 	MarkerMap mm = MarkerMap(myMap.toString()); // conveniently test serialization
 
 	for (int i = 0; i < 5; i++) {
-	    Uuo mine = mm._mines[mm.getPriorityMineIndex()];
+	    Uuo mine = mm._map[mm.getPriorityMineIndex()];
 	    
             // create an order to go to this mine
 	    WaypointOrder wp = WaypointOrder(Point2D(mine.x, mine.y));
@@ -76,8 +76,8 @@ void Coordinator::stateTransition(int newState) {
 
 	    // remove the mine from the myMap copy
 	    map<int,Uuo>::iterator it;
-	    it = mm._mines.find(mine.id);
-	    mm._mines.erase(it);
+	    it = mm._map.find(mine.id);
+	    mm._map.erase(it);
 	}
 
 	sendOrdersTo(slaveOrders, SLAVE_ORDERS_STRING);
@@ -202,11 +202,11 @@ void Coordinator::TestAll() {
     cout << "Testing MarkerMap...";
     MarkerMap m = MarkerMap();
     assert(m.toString() == "");
-    m._mines.insert(pair<int,Uuo>(1, Uuo()));
-    m._mines.insert(pair<int,Uuo>(1337, Uuo()));
-    m._mines.insert(pair<int,Uuo>(-238, Uuo()));
-    m._mines.insert(pair<int,Uuo>(3282, Uuo()));
-    m._mines.insert(pair<int,Uuo>(0, Uuo()));
+    m._map.insert(pair<int,Uuo>(1, Uuo()));
+    m._map.insert(pair<int,Uuo>(1337, Uuo()));
+    m._map.insert(pair<int,Uuo>(-238, Uuo()));
+    m._map.insert(pair<int,Uuo>(3282, Uuo()));
+    m._map.insert(pair<int,Uuo>(0, Uuo()));
     MarkerMap m2 = MarkerMap(m.toString());
     cout << "A: " << m.toString() << endl; cout << "B: " << m2.toString() << endl;
 

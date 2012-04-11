@@ -60,7 +60,7 @@ private:
    int _report_count;
    double _starttime;
 
-   MarkerMap _map;
+   MarkerMap _localMap, _otherMap;
 
    // Sensor settings for this vehicle
    double _Pd;   // prob detection
