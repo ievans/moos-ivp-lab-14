@@ -127,6 +127,7 @@ void Coordinator::stateTransition(int newState) {
 }
 
 void Coordinator::sendOrdersTo(vector<string> orders, string target) {
+    stringstream ss;
     for (int i = 0; i < orders.size(); i++) {
 	cout << "sent orders to " << target << " , orders: " <<  orders[i] << endl;
 
@@ -135,15 +136,20 @@ void Coordinator::sendOrdersTo(vector<string> orders, string target) {
 	}
 	else if (target == SLAVE_ORDERS_STRING) {
 	    // TODO hardcoded vehicle names
-	    stringstream msg;
-	    msg << "src_node=" << "archie"
-		<< ",dest_node=betty,var_name=" + target + ",string_val=\"" 
-		<< orders[i] << "\"";
-	    //	<< "" << _msg_idx;
-	    cout << "sent to slave " << msg.str() << endl;
-	    m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str());
+	    ss << orders[i] << "@";
 	}
     }
+
+    if (target == SLAVE_ORDERS_STRING) {
+	stringstream msg;
+	msg << "src_node=" << "archie"
+	    << ",dest_node=all,var_name=READ_ORDERS,string_val=\"" 
+	    << ss.str() << "\"";
+	cout << "sent to slave " << msg.str() << endl;
+	m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str());
+	usleep(200 * 1000);
+    }
+    
 }
 
 //---------------------------------------------------------
@@ -223,7 +229,7 @@ bool Coordinator::Iterate()
 	}
     }
 
-    if (MOOSTime() - startMOOSTime > 500) {
+    if (MOOSTime() - startMOOSTime > 1000) {
 	if (gameState == GS_ALL_LAWNMOW) {
 	    cout << "making state transition to lawnmow and inspect" << endl;
 	    this->stateTransition(GS_LAWNMOW_AND_INSPECT);

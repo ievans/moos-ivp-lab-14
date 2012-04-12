@@ -76,14 +76,21 @@ bool FollowOrders::OnNewMail(MOOSMSG_LIST &NewMail)
       if ((msg.GetKey() == SLAVE_ORDERS_STRING && GetAppName() == "slave") 
 	  || (msg.GetKey() == MASTER_ORDERS_STRING && GetAppName() == "master")) {
 	  string order = msg.GetString();
-	  cout << "processing order << " << order << endl;
-	  this->processOrderString(order);
+
+	  vector<string> svector = parseString(order, '@');
+	  for (int i = 0; i < svector.size(); i++) {
+	      cout << "processing order << " << svector[i] << endl;
+	      this->processOrderString(svector[i]);
+	  }
+
       }
       else if (msg.GetKey() == "NAV_X") {
           m_Comms.Notify("SLAVE_X", msg.GetDouble());
       }
       else if (msg.GetKey() == "NAV_Y") {
           m_Comms.Notify("SLAVE_Y", msg.GetDouble());
+      } else {
+	  cout << " unknown: " << msg.GetKey() << " --> " << msg.GetString() << endl;
       }
 
    }
@@ -100,7 +107,7 @@ bool FollowOrders::OnConnectToServer()
    // possibly look at the mission file?
    // m_MissionReader.GetConfigurationParam("Name", <string>);
    // m_Comms.Register("VARNAME", 0);
-    m_Comms.Notify("SLAVE_SENSOR_RANGE", 25); // TODO PUT ACTUAL SENSOR RANGE
+    m_Comms.Notify("SLAVE_SENSOR_RANGE", 5); // TODO GET DYNAMICALLY ACTUAL SENSOR RANGE
 
    RegisterVariables();
    return(true);
@@ -132,8 +139,10 @@ bool FollowOrders::OnStartUp()
 void FollowOrders::RegisterVariables()
 {
     cout << "I am " << GetAppName() << endl;
-    if (GetAppName() == "slave")
-	m_Comms.Register(SLAVE_ORDERS_STRING, 0);
+    if (GetAppName() == "slave") {
+	cout << "regd for READ_ORDERS" << endl;
+	m_Comms.Register("READ_ORDERS", 0);
+    }
     else
 	m_Comms.Register(MASTER_ORDERS_STRING, 0);
 
