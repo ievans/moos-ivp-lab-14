@@ -33,7 +33,7 @@ Coordinator::Coordinator()
     myMap = MarkerMap();
     this->TestAll();
     slavePose = Point2D(0, 0, 5); // see note in .h file
-    myPose = Point2D(0, 0, 0);
+    myPose = Point2D(0, 0, 0); // TODO actually update
 }
 
 //---------------------------------------------------------
@@ -41,11 +41,6 @@ Coordinator::Coordinator()
 
 Coordinator::~Coordinator()
 {
-}
-
-vector<Uuo> getNMostValuableUuos(int n) {
-    vector<Uuo> topN;
-    return topN;
 }
 
 void Coordinator::stateTransition(int newState) {
@@ -83,13 +78,15 @@ void Coordinator::stateTransition(int newState) {
 	    wps.push_back(wp);
 	}
 
-	Point2D rendesvous = Point2D(0, 0);
+	Point2D rendezvous = Point2D(0, 0);
 	// optimally sort the waypoint orders
-	wps = WaypointOrder::optimalPath(wps, slavePose, rendesvous);
+	wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous);
 	// finalize meeting at rendezvous
-	wps.push_back(rendesvous);
+	wps.push_back(rendezvous);
 
 	double ttc = WaypointOrder::getTimeToComplete(wps, VEHICLE_SPEED);
+	// reconvene at rendezvous in ttc time
+	
 
         // convert to a string message
 	for (int i = 0; i < wps.size(); i++) {
