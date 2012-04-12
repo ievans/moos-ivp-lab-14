@@ -39,7 +39,6 @@ Behavior = BHV_Waypoint
 // Full area lawnmow
   points = format=lawnmower, label=initSweep, x=125, y=-237.5, height=325, width=550, lane_width=50, rows=east-west, degs=0
 
-
   repeat = 0
   visual_hints = nextpt_color=red, nextpt_lcolor=green
   visual_hints = vertex_color=yellow, edge_color=gray25
@@ -51,6 +50,7 @@ Behavior = BHV_Waypoint
   name      = wpt_follow
   pwt       = 100
   condition = MODE == WORKING
+  condition = COORDMODE == waypoint
   updates   = UP_WPT_PTS
 
   perpetual = true

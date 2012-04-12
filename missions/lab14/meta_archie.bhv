@@ -48,7 +48,7 @@ Behavior = BHV_Waypoint
   name      = wpt_follow
   pwt       = 100
   condition = MODE == WORKING
-  condition = MODE == waypoint
+  condition = COORDMODE == waypoint
   updates   = UP_WPT_PTS
  
   perpetual = true

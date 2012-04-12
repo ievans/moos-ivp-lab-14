@@ -108,7 +108,7 @@ void Coordinator::stateTransition(int newState) {
 	wps.push_back(rendezvous);
 	// set a time to meet
 	rendezvousTime = MOOSTime() + WaypointOrder::getTimeToComplete(wps, VEHICLE_SPEED);
-	rendezvousTime = MOOSTime() + 500;
+	rendezvousTime = MOOSTime() + 200;
 
         // convert to a string message
 	for (int i = 0; i < wps.size(); i++) {
@@ -122,6 +122,7 @@ void Coordinator::stateTransition(int newState) {
 	vector<string> orders;
 	orders.push_back(rv.toString());
 	orders.push_back(rendezvous.toString());
+	orders.push_back(Point2D(10, 10).toString());
 	sendOrdersTo(orders, MASTER_ORDERS_STRING);
 	// transition out of rendezvous state happens automatically when
 	// a map fuse is completed (ie., we are in comm range of slave)
