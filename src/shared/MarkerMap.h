@@ -102,7 +102,7 @@ public:
 
     static double getPriority(Uuo& mine) {
 	// Assume triangle priority.  zero at hazProb = {0,1} and
-	// one at hazProb = 0.5
+	// one at hazProb = PRIORITY_MAX
 	// Biases towards points nearest uncertainty
 	// However, also bias toward low label numbers
 	double priority;

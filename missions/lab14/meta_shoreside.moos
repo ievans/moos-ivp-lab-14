@@ -58,8 +58,8 @@ ProcessConfig = uFldHazardSensor
 
   classify_period = 30
 
-//  hazard_file   = hazards.txt
-  hazard_file   = hazards_set1.txt
+  hazard_file   = hazards_default.txt
+//  hazard_file   = hazards_set1.txt
   verbose       = false
 }
 

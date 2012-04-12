@@ -250,6 +250,29 @@ MarkerMap HandleSensorData::fuseMaps() {
   return newmap;
 }
 
+MarkerMap HandleSensorData::fuseLocalData() {
+  // Ask Rob to type up the bayes math.
+
+  map<int, Uuo>::iterator it_m, it_other;
+  MarkerMap newmap = _localMap;
+  for (it_other = _otherMap._map.begin(); it_other != _otherMap._map.end(); it_other++) {
+    it_m = newmap._map.find(it_other->second.id);
+    if (it_m == newmap._map.end()) {
+      // do nothing, we can't measure this point anyway
+    }
+    else {
+      // integrate the two sets of measurements
+      double Pa = it_m->second.probHazard;
+      double Pb = it_other->second.probHazard;
+      it_m->second.probHazard = (Pa*Pb/PRIOR_PROB) / ( (Pa*Pb/PRIOR_PROB) + ((1-Pa)*(1-Pb)/(1-PRIOR_PROB)) );
+      it_m->second.m_hist = it_m->second.m_hist + it_other->second.m_hist;
+    }
+  }
+
+  // Now newmap's _mines is a complete picture of the map state
+  return newmap;
+}
+
 void HandleSensorData::publishFuseComplete() {
   MarkerMap newmap = fuseMaps();
   string out = newmap.toString();
@@ -259,8 +282,12 @@ void HandleSensorData::publishFuseComplete() {
 void HandleSensorData::classifyUuos() {
   if (MOOSTime() - _classifyTime > _classify_min_time) {
     //    cout << "Best idx was " << best_idx << endl;
-    double best_idx = _localMap.getPriorityMineIndex();
+    MarkerMap fuseMap = fuseLocalData();
+    double best_idx = fuseMap.getPriorityMineIndex();
     if (best_idx > -1) {
+      if (_localMap._map[best_idx].classifyCount < 1) {
+	cout << "ERROR!  BAD FUSE MAP IN CLASSIFY UUOS" << endl;
+      }
       _localMap._map[best_idx].classifyCount--;
       // Post request
       stringstream s;
@@ -302,7 +329,8 @@ void HandleSensorData::printHumanHazardFile(MarkerMap& inmap) {
   for (it = inmap._map.begin(); it != inmap._map.end(); it++) {
     outfile << "[" << it->second.id << "] = " 
 	    << setprecision(4) << fixed << it->second.probHazard 
-	    << "\t" << it->second.isHazard() << "\t" 
+	    << "\t" << it->second.isHazard() << "\t"
+	    << inmap.getPriority(it->second) << "\t" 
 	    << it->second.m_hist << endl;
   }
   outfile.close();
@@ -317,6 +345,7 @@ void HandleSensorData::printHumanHazardFile(MarkerMap& inmap, string filename) {
     outfile << "[" << it->second.id << "] = " 
 	    << setprecision(4) << fixed << it->second.probHazard 
 	    << "\t" << it->second.isHazard() << "\t" 
+	    << inmap.getPriority(it->second) << "\t" 
 	    << it->second.m_hist << endl;
   }
   outfile.close();
@@ -360,7 +389,9 @@ bool HandleSensorData::Iterate()
     //    cout << "_lockout = " << _lockout << endl;
     //    cout << "Timing: " << MOOSTime() << " - " << _starttime
     //	 << " <> " << _endtime << endl;
+  }
 
+  if ( (int)(floor(MOOSTime() - _starttime)) % 200 == 0) {
     MarkerMap newmap = fuseMaps();
     printHumanHazardFile(newmap);
     string str = _vehicle_name + "localMap.txt";

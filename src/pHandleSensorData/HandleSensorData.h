@@ -43,6 +43,7 @@ private:
    void installSensor(int,double);
    void installSensor(int,double,double,double);
    MarkerMap fuseMaps();
+   MarkerMap fuseLocalData();
    void printHumanHazardFile(MarkerMap&);
    void printHumanHazardFile(MarkerMap&, string);
    void publishFuseComplete();
