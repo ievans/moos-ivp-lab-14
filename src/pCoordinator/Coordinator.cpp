@@ -13,7 +13,7 @@
 
 #define FUSE_COMPLETE_MESSAGE_NAME "FUSE_COMPLETE"
 #define LAWNMOW_BEHAVIOR_STRING "lawmow"
-#define WAYPOINT_BEHVIOR_STRING "waypoint"
+#define WAYPOINT_BEHAVIOR_STRING "waypoint"
 #define MASTER_ORDERS_STRING "READ_MASTER_ORDERS"
 #define SLAVE_ORDERS_STRING "READ_ORDERS"
 #define SLAVE_UPDATE_MESSAGE_NAME "SLAVE_POSE"
@@ -34,6 +34,8 @@ Coordinator::Coordinator()
     this->TestAll();
     slavePose = Point2D(0, 0, 5); // see note in .h file
     myPose = Point2D(0, 0, 0); // TODO actually update
+    rendezvousTime = -1;
+    rendezvous = WaypointOrder();
 }
 
 //---------------------------------------------------------
@@ -59,7 +61,7 @@ void Coordinator::stateTransition(int newState) {
 	sendOrdersTo(orders, MASTER_ORDERS_STRING);
 
 	vector<string> slaveOrders;
-	BehaviorOrder wpb = BehaviorOrder(WAYPOINT_BEHVIOR_STRING);
+	BehaviorOrder wpb = BehaviorOrder(WAYPOINT_BEHAVIOR_STRING);
 	slaveOrders.push_back(wpb.toString());
 
 	// generate waypoint orders for the slave
@@ -78,22 +80,32 @@ void Coordinator::stateTransition(int newState) {
 	    wps.push_back(wp);
 	}
 
-	Point2D rendezvous = Point2D(0, 0);
+	// (TODO) meet back up where the master will be in the future 
+	rendezvous.waypoint = myPose;
 	// optimally sort the waypoint orders
-	wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous);
-	// finalize meeting at rendezvous
+	wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous.waypoint);
+	// give slave final waypoint, it's the rendezvous
 	wps.push_back(rendezvous);
-
-	double ttc = WaypointOrder::getTimeToComplete(wps, VEHICLE_SPEED);
-	// reconvene at rendezvous in ttc time
-	
+	// set a time to meet
+	rendezvousTime = MOOSTime() + WaypointOrder::getTimeToComplete(wps, VEHICLE_SPEED);
 
         // convert to a string message
 	for (int i = 0; i < wps.size(); i++) {
 	    slaveOrders.push_back(wps[i].toString());
 	}
 	sendOrdersTo(slaveOrders, SLAVE_ORDERS_STRING);
+    // end state transition to LAWNMOW_AND_INSPECT
+    } else if (newState == GS_RENDEZVOUS) {
+	// set master behavior to be the rendezvous waypoint
+	BehaviorOrder rv = BehaviorOrder(WAYPOINT_BEHAVIOR_STRING);
+	vector<string> orders;
+	orders.push_back(rv.toString());
+	orders.push_back(rendezvous.toString());
+	sendOrdersTo(orders, MASTER_ORDERS_STRING);
+	// TODO: need transition out of rendezvous state
     }
+
+
     gameState = newState;
 }
 
@@ -163,6 +175,11 @@ bool Coordinator::Iterate()
 	    cout << "making state transition to lawnmow and inspect" << endl;
 	    this->stateTransition(GS_LAWNMOW_AND_INSPECT);
 	}
+    }
+
+    if (MOOSTime() - rendezvousTime > 0 && rendezvousTime != -1) {
+	cout << "making state transition to rendezvous" << endl;
+	this->stateTransition(GS_RENDEZVOUS);
     }
 
    return(true);

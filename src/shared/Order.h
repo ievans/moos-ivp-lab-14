@@ -40,6 +40,7 @@ public:
 class WaypointOrder : public Order {
 public:
     Point2D waypoint;
+    WaypointOrder() {};
     WaypointOrder(Point2D w) { type = OrderType::WAYPOINT_ORDER; waypoint = w; };
 
     string toString() { 
