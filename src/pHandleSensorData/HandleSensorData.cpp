@@ -185,9 +185,6 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 }
 	 _last_detect[label] = MOOSTime();
        }
-
-       // Publish new map to coordinator
-       publishFuseComplete();
      }
      else if (key == "UHZ_CONFIG_ACK") {
        // Parse String
@@ -514,8 +511,12 @@ bool HandleSensorData::Iterate()
     	<< ",dest_node=all,var_name=HANDLE_SENSOR_MESSAGE,string_val=\"" 
       	<< printStateMessage() << "\"";
       //	<< "" << _msg_idx;
-      m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
+    m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
     _msg_idx++;
+
+
+    // Publish new map to coordinator
+    publishFuseComplete();
 
     // reset iteration counter
     _iter_count = 0;
