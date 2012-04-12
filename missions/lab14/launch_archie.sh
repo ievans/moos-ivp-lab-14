@@ -82,8 +82,8 @@ fi
 #-------------------------------------------------------
 
 GROUP="GROUP12"
-FULL_VNAME=$VNAME"_archie@"$HOSTNAME
-#FULL_VNAME=archie
+#FULL_VNAME=$VNAME"_archie@"$HOSTNAME
+FULL_VNAME=archie
 WPT_COLOR="light_blue"
 
 # Generate a random start position in range x=[0,180], y=[0,-50]

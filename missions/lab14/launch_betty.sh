@@ -82,8 +82,8 @@ fi
 #-------------------------------------------------------
 
 GROUP="GROUP12"
-FULL_VNAME=$VNAME"_betty@"$HOSTNAME
-#FULL_VNAME=betty
+#FULL_VNAME=$VNAME"_betty@"$HOSTNAME
+FULL_VNAME=betty
 
 WPT_COLOR="light_blue"
 

@@ -563,7 +563,12 @@ void HandleSensorData::generateHazardReport() {
   string out = set.getSpec();
   m_Comms.Notify("HAZARD_REPORT", out );
 
-  printHumanHazardFile(finalmap);
+  ofstream s1;
+  s1.open("HazardReportFormatted.txt");
+  s1 << out << endl;
+  s1.close();
+
+  printHumanHazardFile(finalmap,"finalHazard.txt");
 }
 
 void HandleSensorData::installSensor(int width, double pd) {
