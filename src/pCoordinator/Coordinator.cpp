@@ -248,6 +248,11 @@ bool Coordinator::Iterate()
 	this->stateTransition(GS_RENDEZVOUS);
     }
 
+    if (MOOSTime() > rendezvousTime + 100 && rendezvousTime != -1 && gameState == GS_RENDEZVOUS) {
+	cout << "auto-transitioning out of rendezvous" << endl;
+	this->stateTransition(GS_LAWNMOW_AND_INSPECT);
+    }
+
    return(true);
 }
 

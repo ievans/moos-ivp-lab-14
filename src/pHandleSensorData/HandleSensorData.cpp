@@ -503,7 +503,7 @@ bool HandleSensorData::Iterate()
 
   // run classify subroutine.  Handles time internally
   classifyUuos();
-  runNegativeDetector();
+//  runNegativeDetector();
 
   if (_iter_count == 20) {
     // Constantly send state messages to other vehicle
