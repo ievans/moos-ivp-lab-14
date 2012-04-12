@@ -124,6 +124,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
      }
      else if (key == "HANDLE_SENSOR_MESSAGE") {
        //      cout << "Got Message from other vehicle" << endl;
+	 publishFuseComplete();
        parseStateMessage(msg.GetString());
      }
 
@@ -516,7 +517,7 @@ bool HandleSensorData::Iterate()
 
 
     // Publish new map to coordinator
-    publishFuseComplete();
+    // publishFuseComplete();
 
     // reset iteration counter
     _iter_count = 0;
