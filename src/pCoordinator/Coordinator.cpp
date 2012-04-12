@@ -21,6 +21,7 @@
 #define MAX_VISIT 8 // max number of nodes a slave will visit before rendesvous
 		    // note that these are these are supernodes (see the
 		    // priority queue method in MarkerMap.h)
+#define MIN(a, b) a < b ? a : b
 
 using namespace std;
 
@@ -33,7 +34,7 @@ Coordinator::Coordinator()
     myMap = MarkerMap();
     this->TestAll();
     slavePose = Point2D(0, 0, 5); // see note in .h file
-    myPose = Point2D(0, 0, 0); // TODO actually update
+    myPose = Point2D(0, 0, 0); 
     rendezvousTime = -1;
     rendezvous = WaypointOrder();
 }
@@ -53,7 +54,9 @@ void Coordinator::stateTransition(int newState) {
 	vector<string> orders;
 	orders.push_back(lawnmow.toString());
 	sendOrdersTo(orders, MASTER_ORDERS_STRING);
-    } else if (gameState == GS_ALL_LAWNMOW && newState == GS_LAWNMOW_AND_INSPECT) {
+    } 
+    else if ((gameState == GS_ALL_LAWNMOW || gameState == GS_RENDEZVOUS)
+	       && newState == GS_LAWNMOW_AND_INSPECT) {
 	// keep the master in lawmow mode
 	BehaviorOrder lawnmow = BehaviorOrder(LAWNMOW_BEHAVIOR_STRING);
 	vector<string> orders;
@@ -70,7 +73,6 @@ void Coordinator::stateTransition(int newState) {
 	// go to the most valuable UUOs
 	// note: hack, slavePose.id = the sensor radius of the slave vehicle
 	priority_queue<PriorityNode> pq = myMap.getPriorityNodes(slavePose, slavePose.id);
-#define MIN(a, b) a < b ? a : b
 	for (int i = 0; i < MIN(MAX_VISIT, pq.size()); i++) {
 	    PriorityNode mine = pq.top();
 	    pq.pop();
@@ -80,7 +82,7 @@ void Coordinator::stateTransition(int newState) {
 	    wps.push_back(wp);
 	}
 
-	// (TODO) meet back up where the master will be in the future 
+	// (TODO) meet back up where the master will be in the *future*
 	rendezvous.waypoint = myPose;
 	// optimally sort the waypoint orders
 	wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous.waypoint);
@@ -94,17 +96,17 @@ void Coordinator::stateTransition(int newState) {
 	    slaveOrders.push_back(wps[i].toString());
 	}
 	sendOrdersTo(slaveOrders, SLAVE_ORDERS_STRING);
-    // end state transition to LAWNMOW_AND_INSPECT
-    } else if (newState == GS_RENDEZVOUS) {
+    } // end state transition to LAWNMOW_AND_INSPECT
+    else if (newState == GS_RENDEZVOUS) {
 	// set master behavior to be the rendezvous waypoint
 	BehaviorOrder rv = BehaviorOrder(WAYPOINT_BEHAVIOR_STRING);
 	vector<string> orders;
 	orders.push_back(rv.toString());
 	orders.push_back(rendezvous.toString());
 	sendOrdersTo(orders, MASTER_ORDERS_STRING);
-	// TODO: need transition out of rendezvous state
+	// transition out of rendezvous state happens automatically when
+	// a map fuse is completed (ie., we are in comm range of slave)
     }
-
 
     gameState = newState;
 }
@@ -130,9 +132,29 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
 	  string mapString = msg.GetString();
 	  cout << " got MAP " << mapString << endl;
 	  myMap = MarkerMap(mapString);
-      }
-      if (msg.GetKey() == SLAVE_UPDATE_MESSAGE_NAME) {
+	  // if we were planning on having a rendezvous...it just happened
+	  this->stateTransition(GS_LAWNMOW_AND_INSPECT);
+      } 
+      else if (msg.GetKey() == SLAVE_UPDATE_MESSAGE_NAME) {
 	  slavePose = Point2D(msg.GetString());
+      }
+      else if (msg.GetKey() == SLAVE_UPDATE_MESSAGE_NAME) {
+	  slavePose = Point2D(msg.GetString());
+      }
+      else if (msg.GetKey() == "NAV_X") {
+          myPose.x = msg.GetDouble();
+      } 
+      else if (msg.GetKey() == "NAV_Y") {
+          myPose.y = msg.GetDouble();
+      }
+      else if (msg.GetKey() == "SLAVE_X") {
+          slavePose.x = msg.GetDouble();
+      }
+      else if (msg.GetKey() == "SLAVE_Y") {
+          slavePose.y = msg.GetDouble();
+      }
+      else if (msg.GetKey() == "SLAVE_SENSOR_RANGE") {
+          slavePose.id = msg.GetDouble();
       }
    }
 	
@@ -203,6 +225,11 @@ bool Coordinator::OnStartUp()
 void Coordinator::RegisterVariables()
 {
     m_Comms.Register(FUSE_COMPLETE_MESSAGE_NAME, 0);
+    m_Comms.Register("NAV_X", 0);
+    m_Comms.Register("NAV_Y", 0);
+    m_Comms.Register("SLAVE_X", 0);
+    m_Comms.Register("SLAVE_Y", 0);
+    m_Comms.Register("SLAVE_SENSOR_RANGE", 0);
 }
 
 void Coordinator::TestAll() {

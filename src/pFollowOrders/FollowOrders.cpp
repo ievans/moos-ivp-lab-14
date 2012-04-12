@@ -75,6 +75,12 @@ bool FollowOrders::OnNewMail(MOOSMSG_LIST &NewMail)
 	  string order = msg.GetString();
 	  this->processOrderString(order);
       }
+      else if (msg.GetKey() == "NAV_X") {
+          m_Comms.Notify("SLAVE_X", msg.GetDouble());
+      }
+      else if (msg.GetKey() == "NAV_Y") {
+          m_Comms.Notify("SLAVE_Y", msg.GetDouble());
+      }
 
    }
 	
@@ -90,7 +96,10 @@ bool FollowOrders::OnConnectToServer()
    // possibly look at the mission file?
    // m_MissionReader.GetConfigurationParam("Name", <string>);
    // m_Comms.Register("VARNAME", 0);
-	
+    m_Comms.Notify("SLAVE_SENSOR_RANGE", 5); // TODO PUT ACTUAL SENSOR RANGE
+    m_Comms.Register("NAV_X", 0);
+    m_Comms.Register("NAV_Y", 0);
+
    RegisterVariables();
    return(true);
 }
