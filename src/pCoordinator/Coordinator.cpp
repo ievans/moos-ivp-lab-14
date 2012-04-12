@@ -101,14 +101,14 @@ void Coordinator::stateTransition(int newState) {
 	rendezvous.waypoint = myPose;
 	// optimally sort the waypoint orders
 	cout << "beginning TSP..." << endl;
-	//wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous.waypoint);
+	wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous.waypoint);
 	cout << "TSP complete." << endl;
 	// give slave final waypoint, it's the rendezvous
 	cout << "going to rendezvous at " << rendezvous.toString() << endl;
 	wps.push_back(rendezvous);
 	// set a time to meet
 	rendezvousTime = MOOSTime() + WaypointOrder::getTimeToComplete(wps, VEHICLE_SPEED);
-	rendezvousTime = MOOSTime() + 200;
+	cout << "rendezvous in + " << WaypointOrder::getTimeToComplete(wps, VEHICLE_SPEED) << endl;
 
         // convert to a string message
 	for (int i = 0; i < wps.size(); i++) {

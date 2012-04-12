@@ -153,7 +153,8 @@ public:
 
 	// O(n^2), easily improvable for later (TODO)
 	for (it = _map.begin(); it != _map.end(); it++) {
-	    if (it->second.classifyCount > 0) {
+	    cout << "examening " << it->second.toString() << endl;
+//	    if (it->second.classifyCount > 0) {
 
 		// for each point, examine all neighbors
 		map<int, Uuo>::iterator neighbor_it;
@@ -173,7 +174,7 @@ public:
 //		    pow(currentPos.dist(this_point), EXPONENTIAL_DISTANCE_PENALTY);
 		cout << "point: " << this_point.toString() << ", score " << score << endl;
 		r.push(PriorityNode(score, this_point));
-	    }
+//	    }
 	}
 	return r;
     };

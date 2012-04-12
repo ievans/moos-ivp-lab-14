@@ -60,6 +60,9 @@ public:
     static vector<WaypointOrder> optimalPath(vector<WaypointOrder> wps, Point2D initialPoint, Point2D finalPoint) {
 	// exact TSP
 
+	if (wps.size() <= 1)
+	    return wps;
+
         // next_permutation stops when we have reached the last lexicographical
 	// ordering. To see all permutations, we must sort lexicographically
 	// ahead of time.
