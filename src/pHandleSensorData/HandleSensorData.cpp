@@ -232,6 +232,22 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
        _node_record = new_node_record;
      }
+
+     else if (key == "DEPLOY") {
+       if (msg.GetString() == "true"){
+	 if (_deployed == false) {
+	   _starttime = MOOSTime();
+	   cout << "RESETTING STARTTIME" << endl;
+	 }
+	 _deployed = true;
+       }
+       else if (msg.GetString() == "false") {
+	 _deployed = false;
+       }
+       else {
+	 cout << "Invalid message" << endl;
+       }
+     }
    }
 	
    return(true);
@@ -639,6 +655,7 @@ bool HandleSensorData::OnStartUp()
   _classifyTime = _starttime;
   _endtime = 8500.0;
   _classify_min_time = 30.0;
+  _deployed = false;
 
   // Default sensor settings
   installSensor(50,0.9); // Widest sensor, sensible Pd
@@ -707,5 +724,6 @@ void HandleSensorData::RegisterVariables()
   m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
   //  }
   m_Comms.Register("NODE_REPORT_LOCAL", 0);
+  m_Comms.Register("DEPLOY", 0);
 }
 
