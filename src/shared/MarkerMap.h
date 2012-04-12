@@ -60,7 +60,8 @@ public:
       if (encodedMM == "NONE") {
 	return;
       }
-      map<int,Uuo>::iterator it;
+
+
       vector<string> strvect = parseString(encodedMM,":");
       for (int i = 0; i < strvect.size(); i++) {
 
@@ -69,7 +70,10 @@ public:
 	    for (int j = 0; j < in.size(); j++) {
 		vector<string> var = parseString(in[j],"=");
 
-		if (var[0] == "id") {
+		if (var.size() != 2) { // crucial, prevents segfaults
+		    continue;
+		}
+		if (var[0] == "id") { 
 		    newMine.id = atoi(var[1].c_str());
 		}
 		else if(var[0] == "x") {

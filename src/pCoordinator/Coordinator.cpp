@@ -201,16 +201,21 @@ void Coordinator::TestAll() {
 
     cout << "Testing MarkerMap...";
     MarkerMap m = MarkerMap();
-    assert(m.toString() == "");
-    m._map.insert(pair<int,Uuo>(1, Uuo()));
-    m._map.insert(pair<int,Uuo>(1337, Uuo()));
-    m._map.insert(pair<int,Uuo>(-238, Uuo()));
-    m._map.insert(pair<int,Uuo>(3282, Uuo()));
-    m._map.insert(pair<int,Uuo>(0, Uuo()));
+    //assert(m.toString() == "");
+    Uuo a = Uuo(3, 38.83, 1, 0.238);
+    Uuo b = Uuo(2, -28.28, 328.2, 0.0001);
+    Uuo c = Uuo(-13823, 0, 0, 0.00002);
+    m._map.insert(pair<int,Uuo>(12, a));
+    m._map.insert(pair<int,Uuo>(1337, b));
+    m._map.insert(pair<int,Uuo>(-238, c));
+    m._map.insert(pair<int,Uuo>(3282, Uuo(238.28, 32.282, 382, 32.0)));
+    m._map.insert(pair<int,Uuo>(0, Uuo(328, 23, 2383, 1.0)));
     MarkerMap m2 = MarkerMap(m.toString());
-    cout << "A: " << m.toString() << endl; cout << "B: " << m2.toString() << endl;
-
-    assert(m.toString() == m2.toString());
+    cout << m.toString() << endl;
+    cout << "A: " << m2._map.find(12)->second.toString() << endl; cout << "B: " << a.toString() << endl;
+//    assert(m2._map.find(12)->second.toString() == a.toString());
+//    assert(m2._map.find(1337)->second.toString() == b.toString());
+    assert(m2._map.find(-238)->second.toString() == c.toString());
 
     cout << "ok" << endl;
 }

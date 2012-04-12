@@ -61,7 +61,7 @@ public:
 	return Order::toTypeString() + SEPARATOR + newBehavior;
     };
 
-    string fromString(string s) {
+    void fromString(string s) {
 	vector<string> svector = parseString(s, SEPARATOR);
 	newBehavior = svector[1];
     }

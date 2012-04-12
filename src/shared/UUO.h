@@ -29,6 +29,14 @@ public:
 	classifyCount = 0;
     }
 
+    // for testing
+    Uuo (int id, double x, double y, double probHazard) {
+	this->id = id; 
+	this->x = x; 
+	this->y = y; 
+	this->probHazard = probHazard;
+    }
+
     bool isHazard() {
 	// Todo: Be smarter!
 	if (probHazard > PRIORITY_MAX) {
@@ -65,6 +73,12 @@ public:
       else {
 	return false;
       }
+    }
+
+    string toString() {
+	stringstream s;
+	s << "x=" << x << ",y=" << y << ",id=" << id << ",probHazard=" << probHazard;
+	return s.str();
     }
 };
 
