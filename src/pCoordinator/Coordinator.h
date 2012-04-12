@@ -57,6 +57,7 @@ private:
    Point2D myPose;
    double rendezvousTime;
    WaypointOrder rendezvous;
+   int idx;
 };
 
 #endif 
