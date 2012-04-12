@@ -361,7 +361,7 @@ MarkerMap HandleSensorData::fuseMaps() {
   for (it_other = _otherMap._map.begin(); it_other != _otherMap._map.end(); it_other++) {
     it_m = newmap._map.find(it_other->second.id);
     if (it_m == newmap._map.end()) {
-      newmap._map.insert(*it_other);
+      newmap._map[it_other->second.id] = it_other->second;
     }
     else {
       // integrate the two sets of measurements
@@ -402,7 +402,7 @@ MarkerMap HandleSensorData::fuseLocalData() {
 void HandleSensorData::publishFuseComplete() {
   MarkerMap newmap = fuseMaps();
   string out = newmap.toString();
-  newmap.fromString(out);
+  //  newmap.fromString(out);
   m_Comms.Notify("FUSE_COMPLETE", out);
   //  cout << "FUSE message sent " << endl;;
 }
