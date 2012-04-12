@@ -33,6 +33,8 @@ public:
 
     static OrderType getType(string order) {
 	vector<string> svector = parseString(order, SEPARATOR);
+	if (svector.size() == 0)
+	    return -1;
 	return (OrderType)atoi(svector[0].c_str());
     }
 };

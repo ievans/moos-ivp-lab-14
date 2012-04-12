@@ -14,9 +14,11 @@
 #define FUSE_COMPLETE_MESSAGE_NAME "FUSE_COMPLETE"
 #define LAWNMOW_BEHAVIOR_STRING "lawnmow"
 #define WAYPOINT_BEHAVIOR_STRING "waypoint"
+
 #define MASTER_ORDERS_STRING "READ_MASTER_ORDERS"
 #define SLAVE_ORDERS_STRING "READ_ORDERS"
 #define SLAVE_UPDATE_MESSAGE_NAME "SLAVE_POSE"
+
 #define VEHICLE_SPEED 2 // xy units per second = meters / sec
 #define MAX_VISIT 8 // max number of nodes a slave will visit before rendesvous
 		    // note that these are these are supernodes (see the
@@ -54,6 +56,7 @@ void Coordinator::stateTransition(int newState) {
 	vector<string> orders;
 	orders.push_back(lawnmow.toString());
 	sendOrdersTo(orders, MASTER_ORDERS_STRING);
+	sendOrdersTo(orders, SLAVE_ORDERS_STRING);
     } 
     else if ((gameState == GS_ALL_LAWNMOW || gameState == GS_RENDEZVOUS)
 	       && newState == GS_LAWNMOW_AND_INSPECT) {
@@ -126,7 +129,20 @@ void Coordinator::stateTransition(int newState) {
 void Coordinator::sendOrdersTo(vector<string> orders, string target) {
     for (int i = 0; i < orders.size(); i++) {
 	cout << "sent orders to " << target << " , orders: " <<  orders[i] << endl;
-	m_Comms.Notify(target, orders[i]);
+
+	if (target == MASTER_ORDERS_STRING) {
+	    m_Comms.Notify(target, orders[i]);
+	}
+	else if (target == SLAVE_ORDERS_STRING) {
+	    // TODO hardcoded vehicle names
+	    stringstream msg;
+	    msg << "src_node=" << "archie"
+		<< ",dest_node=betty,var_name=" + target + ",string_val=\"" 
+		<< orders[i] << "\"";
+	    //	<< "" << _msg_idx;
+	    cout << "sent to slave " << msg.str() << endl;
+	    m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str());
+	}
     }
 }
 
@@ -214,7 +230,7 @@ bool Coordinator::Iterate()
 	}
     }
 
-    if (MOOSTime() - rendezvousTime > 0 && rendezvousTime != -1) {
+    if (MOOSTime() - rendezvousTime > 0 && rendezvousTime != -1 && gameState != GS_RENDEZVOUS) {
 	cout << "making state transition to rendezvous" << endl;
 	this->stateTransition(GS_RENDEZVOUS);
     }

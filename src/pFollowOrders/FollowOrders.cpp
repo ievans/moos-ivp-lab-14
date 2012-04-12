@@ -56,6 +56,7 @@ void FollowOrders::processOrderString(string orderS) {
 	BehaviorOrder bo = BehaviorOrder(orderS);
 	// set our behavior to be as follows
 	m_Comms.Notify(BEHAVIOR_UPDATE_NAME, bo.newBehavior);
+	allWaypoints.clear();
 	break;
     }
     default: {
@@ -72,7 +73,8 @@ bool FollowOrders::OnNewMail(MOOSMSG_LIST &NewMail)
    for(p=NewMail.begin(); p!=NewMail.end(); p++) {
       CMOOSMsg &msg = *p;
 
-      if (msg.GetKey() == SLAVE_ORDERS_STRING || msg.GetKey() == MASTER_ORDERS_STRING) {
+      if ((msg.GetKey() == SLAVE_ORDERS_STRING && GetAppName() == "slave") 
+	  || (msg.GetKey() == MASTER_ORDERS_STRING && GetAppName() == "master")) {
 	  string order = msg.GetString();
 	  cout << "processing order << " << order << endl;
 	  this->processOrderString(order);
@@ -110,7 +112,6 @@ bool FollowOrders::OnConnectToServer()
 bool FollowOrders::Iterate()
 {
    // happens AppTick times per second
-	
    return(true);
 }
 
@@ -130,6 +131,7 @@ bool FollowOrders::OnStartUp()
 
 void FollowOrders::RegisterVariables()
 {
+    cout << "I am " << GetAppName() << endl;
     if (GetAppName() == "slave")
 	m_Comms.Register(SLAVE_ORDERS_STRING, 0);
     else
