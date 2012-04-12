@@ -169,8 +169,8 @@ public:
 		// add the point to a sorted list with a value equal to the 
                 // accumulated utility divided by the sqrt of the distance from us
 #define EXPONENTIAL_DISTANCE_PENALTY 0.5
-		double score = utilityAccumulator / 
-		    pow(currentPos.dist(this_point), EXPONENTIAL_DISTANCE_PENALTY);
+		double score = utilityAccumulator; // / 
+//		    pow(currentPos.dist(this_point), EXPONENTIAL_DISTANCE_PENALTY);
 		cout << "point: " << this_point.toString() << ", score " << score << endl;
 		r.push(PriorityNode(score, this_point));
 	    }

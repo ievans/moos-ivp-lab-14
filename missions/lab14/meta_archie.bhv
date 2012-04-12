@@ -50,7 +50,7 @@ Behavior = BHV_Waypoint
   condition = MODE == WORKING
   condition = MODE == waypoint
   updates   = UP_WPT_PTS
-
+ 
   perpetual = true
 
  //        speed = 1.5   // meters per second

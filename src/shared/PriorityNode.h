@@ -20,7 +20,7 @@ public:
     }
 
     const bool operator <(const PriorityNode& pn) const {
-	return (weight > pn.weight);
+	return (weight < pn.weight);
     };
 
 };

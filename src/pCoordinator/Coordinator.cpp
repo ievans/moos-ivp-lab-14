@@ -64,6 +64,7 @@ void Coordinator::stateTransition(int newState) {
 	BehaviorOrder lawnmow = BehaviorOrder(LAWNMOW_BEHAVIOR_STRING);
 	vector<string> orders;
 	orders.push_back(lawnmow.toString());
+
 	sendOrdersTo(orders, MASTER_ORDERS_STRING);
 
 	vector<string> slaveOrders;
@@ -81,6 +82,7 @@ void Coordinator::stateTransition(int newState) {
 	// go to the most valuable UUOs
 	// note: hack, slavePose.id = the sensor radius of the slave vehicle
 	priority_queue<PriorityNode> pq = myMap.getPriorityNodes(slavePose, slavePose.id);
+
 	int minePops = MAX_VISIT;
 	if (pq.size() < MAX_VISIT)
 	    minePops = pq.size();
@@ -99,12 +101,14 @@ void Coordinator::stateTransition(int newState) {
 	rendezvous.waypoint = myPose;
 	// optimally sort the waypoint orders
 	cout << "beginning TSP..." << endl;
-	wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous.waypoint);
+	//wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous.waypoint);
 	cout << "TSP complete." << endl;
 	// give slave final waypoint, it's the rendezvous
+	cout << "going to rendezvous at " << rendezvous.toString() << endl;
 	wps.push_back(rendezvous);
 	// set a time to meet
 	rendezvousTime = MOOSTime() + WaypointOrder::getTimeToComplete(wps, VEHICLE_SPEED);
+	rendezvousTime = MOOSTime() + 500;
 
         // convert to a string message
 	for (int i = 0; i < wps.size(); i++) {
@@ -129,7 +133,7 @@ void Coordinator::stateTransition(int newState) {
 void Coordinator::sendOrdersTo(vector<string> orders, string target) {
     stringstream ss;
     for (int i = 0; i < orders.size(); i++) {
-	cout << "sent orders to " << target << " , orders: " <<  orders[i] << endl;
+	//cout << "sent orders to " << target << " , orders: " <<  orders[i] << endl;
 
 	if (target == MASTER_ORDERS_STRING) {
 	    m_Comms.Notify(target, orders[i]);
@@ -145,7 +149,7 @@ void Coordinator::sendOrdersTo(vector<string> orders, string target) {
 	msg << "src_node=" << "archie"
 	    << ",dest_node=all,var_name=READ_ORDERS,string_val=\"" 
 	    << ss.str() << "\"";
-	cout << "sent to slave " << msg.str() << endl;
+	//cout << "sent to slave " << msg.str() << endl;
 	m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str());
 	usleep(200 * 1000);
     }
@@ -164,10 +168,12 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
 
       if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME) {
 	  string mapString = msg.GetString();
-	  cout << " got MAP " << mapString << endl;
+//	  cout << " got MAP " << mapString << endl;
 	  myMap = MarkerMap(mapString);
 	  // if we were planning on having a rendezvous...it just happened
-	  this->stateTransition(GS_LAWNMOW_AND_INSPECT);
+	  if (gameState == GS_RENDEZVOUS) {
+	      this->stateTransition(GS_LAWNMOW_AND_INSPECT);
+	  }
       } 
       else if (msg.GetKey() == SLAVE_UPDATE_MESSAGE_NAME) {
 	  slavePose = Point2D(msg.GetString());
@@ -229,14 +235,14 @@ bool Coordinator::Iterate()
 	}
     }
 
-    if (MOOSTime() - startMOOSTime > 1000) {
+    if (MOOSTime() - startMOOSTime > 200) {
 	if (gameState == GS_ALL_LAWNMOW) {
 	    cout << "making state transition to lawnmow and inspect" << endl;
 	    this->stateTransition(GS_LAWNMOW_AND_INSPECT);
 	}
     }
 
-    if (MOOSTime() - rendezvousTime > 0 && rendezvousTime != -1 && gameState != GS_RENDEZVOUS) {
+    if (MOOSTime() > rendezvousTime && rendezvousTime != -1 && gameState != GS_RENDEZVOUS) {
 	cout << "making state transition to rendezvous" << endl;
 	this->stateTransition(GS_RENDEZVOUS);
     }

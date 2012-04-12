@@ -55,7 +55,8 @@ void FollowOrders::processOrderString(string orderS) {
     case OrderType::BEHAVIOR_ORDER: {
 	BehaviorOrder bo = BehaviorOrder(orderS);
 	// set our behavior to be as follows
-	m_Comms.Notify(BEHAVIOR_UPDATE_NAME, bo.newBehavior);
+	cout << "sending " << parseString(bo.newBehavior, ":")[1] << " init from " << orderS << endl;
+	m_Comms.Notify(BEHAVIOR_UPDATE_NAME, parseString(bo.newBehavior, ":")[1]);
 	allWaypoints.clear();
 	break;
     }
