@@ -52,6 +52,8 @@ private:
    int gameState;
    double startMOOSTime;
    MarkerMap myMap;
+   Point2D slavePose; // we abuse this and store the slave's sensor radius on the id field
+   Point2D myPose;
 };
 
 #endif 

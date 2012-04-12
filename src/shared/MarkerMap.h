@@ -8,7 +8,9 @@
 #define MARKERMAP_HEADER
 
 #include "UUO.h"
+#include "PriorityNode.h"
 #include <map>
+#include <queue>
 
 class MarkerMap {
 public:
@@ -137,7 +139,42 @@ public:
 	    }
 	}
 	return best_idx;
-    }
+    };
+
+    /*
+     * Given a current position and the radius of a sensor that can detect
+     * mines within SENSOR_RADIUS of that position, returns an priority queue
+     * of the top priority nodes to visit. This list should then be run
+     * through a path planning algorithm (such as a TSP approximation).
+     */
+    priority_queue<PriorityNode> getPriorityNodes(Point2D currentPos, double SENSOR_RADIUS) {
+	priority_queue<PriorityNode> r;
+	map<int, Uuo>::iterator it;
+
+	// O(n^2), easily improvable for later (TODO)
+	for (it = _map.begin(); it != _map.end(); it++) {
+	    if (it->second.classifyCount > 0) {
+
+		// for each point, examine all neighbors
+		map<int, Uuo>::iterator neighbor_it;
+		double utilityAccumulator = 0;
+		Point2D this_point = it->second.getPoint();
+		for (neighbor_it = _map.begin(); neighbor_it != _map.end(); neighbor_it++) {
+		    // if the neighbor is within sensor distance, add its priority to this point
+		    if (neighbor_it->second.getPoint().dist(this_point) <= SENSOR_RADIUS) {
+			utilityAccumulator += MarkerMap::getPriority(neighbor_it->second);
+		    }
+		}
+		
+		// add the point to a sorted list with a value equal to the 
+                // accumulated utility divided by the sqrt of the distance from us
+#define EXPONENTIAL_DISTANCE_PENALTY 0.5
+		r.push(PriorityNode(utilityAccumulator / 
+				    pow(currentPos.dist(this_point), EXPONENTIAL_DISTANCE_PENALTY), 
+				    this_point));
+	    }
+	}
+    };
 
 }; // end class definition
 

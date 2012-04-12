@@ -16,6 +16,11 @@
 #define WAYPOINT_BEHVIOR_STRING "waypoint"
 #define MASTER_ORDERS_STRING "READ_MASTER_ORDERS"
 #define SLAVE_ORDERS_STRING "READ_ORDERS"
+#define SLAVE_UPDATE_MESSAGE_NAME "SLAVE_POSE"
+#define VEHICLE_SPEED 2 // xy units per second = meters / sec
+#define MAX_VISIT 8 // max number of nodes a slave will visit before rendesvous
+		    // note that these are these are supernodes (see the
+		    // priority queue method in MarkerMap.h)
 
 using namespace std;
 
@@ -27,6 +32,8 @@ Coordinator::Coordinator()
     gameState = GS_INITIAL;
     myMap = MarkerMap();
     this->TestAll();
+    slavePose = Point2D(0, 0, 5); // see note in .h file
+    myPose = Point2D(0, 0, 0);
 }
 
 //---------------------------------------------------------
@@ -60,26 +67,34 @@ void Coordinator::stateTransition(int newState) {
 	BehaviorOrder wpb = BehaviorOrder(WAYPOINT_BEHVIOR_STRING);
 	slaveOrders.push_back(wpb.toString());
 
-	// generate waypoint behaviors for the slave
-	// read the top N most important points to classify, tell it to go
-	// look at them
- 
-        // make a copy of myMap so we can destructively pop things
-	MarkerMap mm = MarkerMap(myMap.toString()); // conveniently test serialization
+	// generate waypoint orders for the slave
+	vector<WaypointOrder> wps;
 
-	for (int i = 0; i < 5; i++) {
-	    Uuo mine = mm._map[mm.getPriorityMineIndex()];
+	// go to the most valuable UUOs
+	// note: hack, slavePose.id = the sensor radius of the slave vehicle
+	priority_queue<PriorityNode> pq = myMap.getPriorityNodes(slavePose, slavePose.id);
+#define MIN(a, b) a < b ? a : b
+	for (int i = 0; i < MIN(MAX_VISIT, pq.size()); i++) {
+	    PriorityNode mine = pq.top();
+	    pq.pop();
 	    
             // create an order to go to this mine
-	    WaypointOrder wp = WaypointOrder(Point2D(mine.x, mine.y));
-	    slaveOrders.push_back(wp.toString());
-
-	    // remove the mine from the myMap copy
-	    map<int,Uuo>::iterator it;
-	    it = mm._map.find(mine.id);
-	    mm._map.erase(it);
+	    WaypointOrder wp = WaypointOrder(mine.getPoint());
+	    wps.push_back(wp);
 	}
 
+	Point2D rendesvous = Point2D(0, 0);
+	// optimally sort the waypoint orders
+	wps = WaypointOrder::optimalPath(wps, slavePose, rendesvous);
+	// finalize meeting at rendezvous
+	wps.push_back(rendesvous);
+
+	double ttc = WaypointOrder::getTimeToComplete(wps, VEHICLE_SPEED);
+
+        // convert to a string message
+	for (int i = 0; i < wps.size(); i++) {
+	    slaveOrders.push_back(wps[i].toString());
+	}
 	sendOrdersTo(slaveOrders, SLAVE_ORDERS_STRING);
     }
     gameState = newState;
@@ -106,6 +121,9 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
 	  string mapString = msg.GetString();
 	  cout << " got MAP " << mapString << endl;
 	  myMap = MarkerMap(mapString);
+      }
+      if (msg.GetKey() == SLAVE_UPDATE_MESSAGE_NAME) {
+	  slavePose = Point2D(msg.GetString());
       }
    }
 	
@@ -220,6 +238,28 @@ void Coordinator::TestAll() {
 
     // should !=, because ID of Uuo didn't match inserted ID
     assert(m2._map[3282].toString() != d.toString());
+    cout << "ok" << endl;
 
+    cout << "Testing TSP...";
+    vector<WaypointOrder> wps;
+    wps.push_back(WaypointOrder(Point2D(10, 10)));
+    wps.push_back(WaypointOrder(Point2D(9, 9)));
+    wps.push_back(WaypointOrder(Point2D(6, 7)));
+    wps.push_back(WaypointOrder(Point2D(6, 6)));
+    wps.push_back(WaypointOrder(Point2D(3, 63)));
+    wps.push_back(WaypointOrder(Point2D(163, 163)));
+    wps.push_back(WaypointOrder(Point2D(63, 363)));
+    wps.push_back(WaypointOrder(Point2D(663, 663)));
+
+//    wps.push_back(WaypointOrder(Point2D(1, 1)));
+//    wps.push_back(WaypointOrder(Point2D(6, 99)));
+//    wps.push_back(WaypointOrder(Point2D(1337, 63)));
+//    wps.push_back(WaypointOrder(Point2D(163, 163)));
+
+    wps = WaypointOrder::optimalPath(wps, Point2D(0, 0), Point2D(30, 30));
+    cout << "returned min path cost " << WaypointOrder::pathLength(wps, Point2D(0, 0), Point2D(30, 30)) << endl;
+    for (int i = 0; i < wps.size(); i++) {
+	cout << wps[i].toString() << endl;
+    }
     cout << "ok" << endl;
 }

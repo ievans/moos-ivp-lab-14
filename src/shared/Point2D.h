@@ -6,6 +6,7 @@
 #include <iterator>
 #include <iostream>
 #include <string>
+#include <math.h>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ public:
     int id;
 
     Point2D() {};
-    Point2D(double px, double py) { x = px; y = py; };
+    Point2D(double px, double py) { x = px; y = py; id = -1;};
     Point2D(double px, double py, int pid) { x = px; y = py; id = pid; };
     Point2D(double px, double py, string pid) { x = px; y = py; id = atoi(pid.c_str()); };
     Point2D(string encodedPoint) { this->fromString(encodedPoint); }
@@ -33,6 +34,19 @@ public:
 	x  = atof(svector[1].c_str());
 	y  = atof(svector[2].c_str());
     }
+    
+    double dist(Point2D toPoint) {
+	return sqrt((toPoint.x - this->x) * (toPoint.x - this->x) + 
+		    (toPoint.y - this->y) * (toPoint.y - this->y));
+    }
+
+    const bool operator <(const Point2D& op) const {
+	if (x == op.x)
+	    return (y < op.y);
+	else 
+	    return (x < op.x);
+    }
+
 };
 
 #endif
