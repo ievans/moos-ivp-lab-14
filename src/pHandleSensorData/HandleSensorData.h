@@ -91,6 +91,8 @@ private:
    // Do something like this later?
    // For use in doing classify priority
    //std::priority_queue<Uuo> _classifyQueue;
+
+   bool _deployed;
 };
 
 #endif 
