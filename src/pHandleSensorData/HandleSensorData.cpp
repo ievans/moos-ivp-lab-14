@@ -42,9 +42,12 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
      //     cout << "Got Mail : " << msg.GetKey() << endl;
 
      // This is a classification report
-     if (key == "UHZ_HAZARD_REPORT") {
+     if (key == "UHZ_DETECTION_REPORT") {
        // Parse String
        string str = msg.GetString();
+
+       cout << "UHZ_DETECTION_REPORT is " << str << endl;
+
        vector<string> strv = parseString(str,",");
 
        double x,y;
@@ -74,6 +77,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 }
 	 else if (input[0] == "label") {
 	   label = atoi(input[1].c_str());
+	   cout << "set label to " << label << endl;
 	   paramcount++;
 	 }
        }
@@ -85,20 +89,20 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 map<int, Uuo>::iterator it;
 	 it = _localMap._map.find(label);
 	 if (it == _localMap._map.end()) {
-	   cout << "ERROR!  classification uuo not found!" << endl;
+	   cout << "ERROR!  classification uuo '" << label << "' not found! map:" << endl;
+	   cout << _localMap.toString() << endl;
+	 } else {
+	     // Do bayesian update
+	     double haz = it->second.probHazard;
+	     if (hazard) {
+		 it->second.probHazard = (_Pc*haz) / (_Pc*haz + (1-_Pc)*(1-haz));
+		 it->second.m_hist = it->second.m_hist + "x";
+	     }
+	     else {
+		 it->second.probHazard = ( (1-_Pc)*haz ) / ( (1-_Pc)*haz + _Pc*(1-haz) );
+		 it->second.m_hist = it->second.m_hist + "o";
+	     }
 	 }
-
-	 // Do bayesian update
-	 double haz = it->second.probHazard;
-	 if (hazard) {
-	   it->second.probHazard = (_Pc*haz) / (_Pc*haz + (1-_Pc)*(1-haz));
-	   it->second.m_hist = it->second.m_hist + "x";
-	 }
-	 else {
-	   it->second.probHazard = ( (1-_Pc)*haz ) / ( (1-_Pc)*haz + _Pc*(1-haz) );
-	   it->second.m_hist = it->second.m_hist + "o";
-	 }
-
 	 //m_Comms.Notify("LOCAL_SENSOR_MESSAGE", printStateMessage());
 	 //	 cout << "Saw mine #" << label << endl;
 
@@ -126,9 +130,13 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
        parseStateMessage(msg.GetString());
      }
 
-     else if (key == "UHZ_DETECTION_REPORT") {
+     else if (key == "UHZ_HAZARD_REPORT") {
+	 
        // Parse String
        string str = msg.GetString();
+
+       cout << "UHZ_HAZARD_REPORT is " << str << endl;
+
        vector<string> strv = parseString(str,",");
 
        double x,y;
@@ -165,7 +173,8 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 if (it == _localMap._map.end()) {
 	   // add new sighting to map
 	   newMine.classifyCount = 1;
-	   _localMap._map.insert(pair<int,Uuo>(label,newMine));
+	   _localMap._map[label] = newMine;
+	   cout << "inserted newMine " << " map is " << _localMap.toString() << endl;
 	   // Apply the measurement with bayes
 	   it = _localMap._map.find(label);
 	   double haz = it->second.probHazard;
@@ -277,6 +286,7 @@ void HandleSensorData::publishFuseComplete() {
   MarkerMap newmap = fuseMaps();
   string out = newmap.toString();
   m_Comms.Notify("FUSE_COMPLETE", out);
+  cout << "fused" << endl;
 }
 
 void HandleSensorData::classifyUuos() {

@@ -205,17 +205,21 @@ void Coordinator::TestAll() {
     Uuo a = Uuo(3, 38.83, 1, 0.238);
     Uuo b = Uuo(2, -28.28, 328.2, 0.0001);
     Uuo c = Uuo(-13823, 0, 0, 0.00002);
-    m._map.insert(pair<int,Uuo>(12, a));
-    m._map.insert(pair<int,Uuo>(1337, b));
-    m._map.insert(pair<int,Uuo>(-238, c));
-    m._map.insert(pair<int,Uuo>(3282, Uuo(238.28, 32.282, 382, 32.0)));
+    Uuo d = Uuo(23811, 32.282, 382, 32.0);
+    m._map.insert(pair<int,Uuo>(3, a));
+    m._map.insert(pair<int,Uuo>(2, b));
+    m._map.insert(pair<int,Uuo>(-13823, c));
+    m._map.insert(pair<int,Uuo>(3282, d));
     m._map.insert(pair<int,Uuo>(0, Uuo(328, 23, 2383, 1.0)));
     MarkerMap m2 = MarkerMap(m.toString());
-    cout << m.toString() << endl;
-    cout << "A: " << m2._map.find(12)->second.toString() << endl; cout << "B: " << a.toString() << endl;
-//    assert(m2._map.find(12)->second.toString() == a.toString());
-//    assert(m2._map.find(1337)->second.toString() == b.toString());
-    assert(m2._map.find(-238)->second.toString() == c.toString());
+//    cout << m.toString() << endl;
+//    cout << "A: " << m2._map[3].toString() << endl; cout << "B: " << a.toString() << endl;
+    assert(m2._map[3].toString() == a.toString());
+    assert(m2._map[2].toString() == b.toString());
+    assert(m2._map[-13823].toString() == c.toString());
+
+    // should !=, because ID of Uuo didn't match inserted ID
+    assert(m2._map[3282].toString() != d.toString());
 
     cout << "ok" << endl;
 }

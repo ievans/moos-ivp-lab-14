@@ -61,7 +61,6 @@ public:
 	return;
       }
 
-
       vector<string> strvect = parseString(encodedMM,":");
       for (int i = 0; i < strvect.size(); i++) {
 
