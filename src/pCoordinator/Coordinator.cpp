@@ -142,7 +142,7 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
 
       if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME || msg.GetKey() == "HANDLE_SENSOR_MESSAGE") {
 	  string mapString = msg.GetString();
-	  //cout << " got MAP " << mapString << endl;
+	  cout << " got MAP " << mapString << endl;
 	  myMap = MarkerMap(mapString);
 	  // if we were planning on having a rendezvous...it just happened
 	  this->stateTransition(GS_LAWNMOW_AND_INSPECT);
