@@ -10,8 +10,9 @@ ADD_EXECUTABLE(pFollowOrders ${SRC})
 TARGET_LINK_LIBRARIES(pFollowOrders
    MOOS
    MOOSGen
+   geometry
    mbutil
    m
    pthread
-   geometry)
+   )
 

@@ -168,13 +168,13 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	   // add new sighting to map
 	   newMine.classifyCount = 1;
 	   _localMap._map[label] = newMine;
-	   cout << "inserted newMine " << " map is " << _localMap.toString() << endl;
+	   //	   cout << "inserted newMine " << " map is " << _localMap.toString() << endl;
 	   // Apply the measurement with bayes
 	   it = _localMap._map.find(label);
 	   double haz = it->second.probHazard;
 	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
 	   _last_in_box[label] = true;
-	   _last_time_in_box[label] = MOOSTime()-2; // hack
+	   _last_time_in_box[label] = MOOSTime();
 	 }
 	 else {
 	   it->second.classifyCount++;
@@ -222,12 +222,13 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	      << "," << pfa << "," << pclass << endl;
        }
      }
-     else if (key == "NODE_REPORT") {
+     else if (key == "NODE_REPORT_LOCAL") {
        NodeRecord new_node_record = string2NodeRecord(msg.GetString().c_str());
 
        if(!new_node_record.valid()) {
 	 cout << "NodeRecord error " << endl;
        }
+       cout << "new_node_record: " << new_node_record.getSpec() << endl;
 
        _node_record = new_node_record;
      }
@@ -332,25 +333,32 @@ void HandleSensorData::runNegativeDetector() {
   for(p=_localMap._map.begin(); p!=_localMap._map.end(); p++) {
     int hlabel = p->first;
     bool new_report = updateVehicleHazardStatus(hlabel);  // detection dice
-    if(new_report) 
+    if(new_report) {
       _last_time_in_box[p->first] = MOOSTime();
 
-    // temp hack
-    if (p->first == 80 && tempcount < 40) {
-      cout << "new report = " << new_report << endl;
-      cout << "_last_time_in_box = " << _last_time_in_box[p->first] << endl;
-      cout << "_last_detect = " << _last_detect[p->first] << endl;
-      cout << "MoosTime = " << MOOSTime() << endl;
-      cout << "if1 = " << (_last_time_in_box[p->first] - _last_detect[p->first]) << endl;
-      cout << "if2 = " << (MOOSTime() -  _last_time_in_box[p->first]) << endl;
+      // // temp hack
+      // if (p->first == 80 && tempcount < 40) {
+        cout << "new report = " << new_report << endl;
+        cout << "_last_time_in_box = " << _last_time_in_box[p->first] << endl;
+        cout << "_last_detect = " << _last_detect[p->first] << endl;
+        cout << "MoosTime = " << MOOSTime() << endl;
+        cout << "if1 = " << (_last_time_in_box[p->first] - _last_detect[p->first]) << endl;
+        cout << "if2 = " << (MOOSTime() -  _last_time_in_box[p->first]) << endl;
+      // }
     }
 
     if (_last_time_in_box[p->first] - _last_detect[p->first] > 1.0 &&
 	MOOSTime() -  _last_time_in_box[p->first] > 1.0) {
       // We missed it
-      if (p->first == 80) {
-	cout << "80 got into negativeDetect" << endl;
-      }
+
+      cout << p->first << " got into negativeDetect" << endl;
+	cout << "new report = " << new_report << endl;
+	cout << "_last_time_in_box = " << _last_time_in_box[p->first] << endl;
+	cout << "_last_detect = " << _last_detect[p->first] << endl;
+	cout << "MoosTime = " << MOOSTime() << endl;
+	cout << "if1 = " << (_last_time_in_box[p->first] - _last_detect[p->first]) << endl;
+	cout << "if2 = " << (MOOSTime() -  _last_time_in_box[p->first]) << endl;
+
       negativeDetect(p->first);
       _last_detect[p->first] = _last_time_in_box[p->first];
     }
@@ -416,7 +424,7 @@ void HandleSensorData::publishFuseComplete() {
   string out = newmap.toString();
   newmap.fromString(out);
   m_Comms.Notify("FUSE_COMPLETE", out);
-  cout << "FUSE message sent " << endl;;
+  //  cout << "FUSE message sent " << endl;;
 }
 
 void HandleSensorData::classifyUuos() {
@@ -738,6 +746,6 @@ void HandleSensorData::RegisterVariables()
   //  if (_isPrimary) {
   m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
   //  }
-  m_Comms.Register("NODE_REPORT", 0);
+  m_Comms.Register("NODE_REPORT_LOCAL", 0);
 }
 
