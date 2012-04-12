@@ -14,6 +14,10 @@
 #include "XYHazardSet.h"
 #include <math.h>
 #include <queue>
+#include "NodeRecordUtils.h"
+#include "GeomUtils.h"
+#include "AngleUtils.h"
+#include "XYPolygon.h"
 
 #include "../shared/MarkerMap.h"
 #include "../shared/UUO.h"
@@ -48,6 +52,17 @@ private:
    void printHumanHazardFile(MarkerMap&, string);
    void publishFuseComplete();
 
+   void runNegativeDetector();
+   map<int,double> _last_detect;
+   map<int,bool> _last_in_box;
+   map<int,double> _last_time_in_box;
+   NodeRecord _node_record;
+   XYPolygon _poly;
+   void negativeDetect(int);
+   bool updateVehicleHazardStatus(int);
+   void calcSwathGeometry(double, double&, double&);
+   bool updateNodePolygon();
+
    string _vehicle_name;
    double _classify_min_time;
    double _endtime;
@@ -76,6 +91,9 @@ private:
    // Do something like this later?
    // For use in doing classify priority
    //std::priority_queue<Uuo> _classifyQueue;
+
+
+   int tempcount;
 };
 
 #endif 

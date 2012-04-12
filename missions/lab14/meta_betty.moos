@@ -26,7 +26,7 @@ Processconfig = ANTLER
   Run = uTimerScript     @ NewConsole = false
   Run = uTimerScript     @ NewConsole = false ~ uTimerScript_SensorConfig
   Run = uXMS             @ NewConsole = true
-  Run = pHandleSensorData @ NewConsole = true
+  Run = pHandleSensorData @ NewConsole = false
   Run = pFollowOrders	   @ NewConsole = true
 }
 

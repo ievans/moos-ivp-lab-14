@@ -170,6 +170,8 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	   it = _localMap._map.find(label);
 	   double haz = it->second.probHazard;
 	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
+	   _last_in_box[label] = true;
+	   _last_time_in_box[label] = MOOSTime()-2; // hack
 	 }
 	 else {
 	   it->second.classifyCount++;
@@ -178,6 +180,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	   double haz = it->second.probHazard;
 	   it->second.probHazard = (_Pd*haz) / (_Pd*haz + _Pfa*(1-haz));
 	 }
+	 _last_detect[label] = MOOSTime();
        }
 
        // Publish new map to coordinator
@@ -216,14 +219,146 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	      << "," << pfa << "," << pclass << endl;
        }
      }
+     else if (key == "NODE_REPORT") {
+       NodeRecord new_node_record = string2NodeRecord(msg.GetString().c_str());
+
+       if(!new_node_record.valid()) {
+	 cout << "NodeRecord error " << endl;
+       }
+
+       _node_record = new_node_record;
+     }
    }
 	
    return(true);
 }
 
+void HandleSensorData::negativeDetect(int id) {
+  // do bayesian update
+  map<int,Uuo>::iterator it;
+  it = _localMap._map.find(id);
+  double haz = it->second.probHazard;
+  it->second.probHazard = ((1-_Pd)*haz) / ((1-_Pd)*haz + (1-_Pfa)*(1-haz));
+  it->second.m_hist = it->second.m_hist + "^";
+}
+
+//------------------------------------------------------------
+// Procedure: updateVehicleHazardStatus
+
+bool HandleSensorData::updateVehicleHazardStatus(int hazard_int)
+{
+
+  bool previous_contained_status = _last_in_box[hazard_int];
+
+  // Now figure out what the new status should be
+  double haz_x  = _localMap._map[hazard_int].x;
+  double haz_y  = _localMap._map[hazard_int].y;
+
+  bool new_contained_status = _poly.contains(haz_x, haz_y);
+  
+  _last_in_box[hazard_int] = new_contained_status;
+
+  if((new_contained_status == true) && (previous_contained_status == false)) {
+      return(true);
+  }
+
+  return(false);
+}
+
+void HandleSensorData::calcSwathGeometry(double swath_wid, double& phi, double& hypot)
+{
+  double m_swath_len = 5.0;
+  phi   = atan(m_swath_len / swath_wid);
+  hypot = swath_wid / cos(phi);
+  phi   = radToDegrees(phi);
+}
+//------------------------------------------------------------
+// Procedure: updateNodePolygon
+
+bool HandleSensorData::updateNodePolygon()
+{
+
+  double x     = _node_record.getX();
+  double y     = _node_record.getY();
+  double hdg   = _node_record.getHeading();
+  string vname = _node_record.getName();
+
+  double swath_width = _width;
+
+  double phi, hypot;
+  calcSwathGeometry(swath_width, phi, hypot);
+
+  double x1,y1, hdg1 = angle360(hdg + (90-phi));
+  double x2,y2, hdg2 = angle360(hdg + (90+phi));
+  double x3,y3, hdg3 = angle360(hdg + (90-phi) + 180);
+  double x4,y4, hdg4 = angle360(hdg + (90+phi) + 180);
+
+  projectPoint(hdg1, hypot, x, y, x1, y1); 
+  projectPoint(hdg2, hypot, x, y, x2, y2); 
+  projectPoint(hdg3, hypot, x, y, x3, y3); 
+  projectPoint(hdg4, hypot, x, y, x4, y4); 
+  
+  XYPolygon poly;
+  poly.add_vertex(x1, y1);
+  poly.add_vertex(x2, y2);
+  poly.add_vertex(x3, y3);
+  poly.add_vertex(x4, y4);
+
+  poly.set_color("edge", "green");
+  poly.set_color("fill", "white");
+  poly.set_vertex_size(0);
+  poly.set_edge_size(0);
+
+  string label = "sensor_swath_" + vname;
+  poly.set_label(label);
+  poly.set_msg("_null_");
+  
+  poly.set_transparency(0.5);
+
+  _poly = poly;
+  return(true);
+}
+
+void HandleSensorData::runNegativeDetector() {
+  updateNodePolygon();
+
+  // For each hazard, determine if the hazard is newly within the sensor 
+  // swath of the requesting vehicle.
+  
+  map<int,Uuo>::iterator p;
+  for(p=_localMap._map.begin(); p!=_localMap._map.end(); p++) {
+    int hlabel = p->first;
+    bool new_report = updateVehicleHazardStatus(hlabel);  // detection dice
+    if(new_report) 
+      _last_time_in_box[p->first] = MOOSTime();
+
+    // temp hack
+    if (p->first == 80 && tempcount < 40) {
+      cout << "new report = " << new_report << endl;
+      cout << "_last_time_in_box = " << _last_time_in_box[p->first] << endl;
+      cout << "_last_detect = " << _last_detect[p->first] << endl;
+      cout << "MoosTime = " << MOOSTime() << endl;
+      cout << "if1 = " << (_last_time_in_box[p->first] - _last_detect[p->first]) << endl;
+      cout << "if2 = " << (MOOSTime() -  _last_time_in_box[p->first]) << endl;
+    }
+
+    if (_last_time_in_box[p->first] - _last_detect[p->first] > 1.0 &&
+	MOOSTime() -  _last_time_in_box[p->first] > 1.0) {
+      // We missed it
+      if (p->first == 80) {
+	cout << "80 got into negativeDetect" << endl;
+      }
+      negativeDetect(p->first);
+      _last_detect[p->first] = _last_time_in_box[p->first];
+    }
+
+  }
+}
+
+
 void HandleSensorData::parseStateMessage(string msg) {
-  cout << "Parsing: " << endl;
-  cout << msg << endl;
+  // cout << "Parsing: " << endl;
+  //cout << msg << endl;
     _otherMap.fromString(msg);
 }
 
@@ -359,8 +494,15 @@ bool HandleSensorData::Iterate()
 {	
   //  cout << "Iterate Start" << endl;
 
+  // temp hack
+  if (_localMap._map.find(80) != _localMap._map.end() && tempcount < 40){
+    //    cout << "80: " << _last_in_box[80] << endl;
+    tempcount++;
+  }
+
   // run classify subroutine.  Handles time internally
   classifyUuos();
+  runNegativeDetector();
 
   if (_iter_count == 20) {
     // Constantly send state messages to other vehicle
@@ -523,6 +665,7 @@ bool HandleSensorData::OnStartUp()
   _classifyTime = _starttime;
   _endtime = 8500.0;
   _classify_min_time = 30.0;
+  tempcount = 0;
 
   // Default sensor settings
   installSensor(50,0.9); // Widest sensor, sensible Pd
@@ -588,7 +731,8 @@ void HandleSensorData::RegisterVariables()
   m_Comms.Register("UHZ_CONFIG_ACK", 0);
 
   //  if (_isPrimary) {
-        m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
-	//  }
+  m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
+  //  }
+  m_Comms.Register("NODE_REPORT", 0);
 }
 

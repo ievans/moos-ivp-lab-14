@@ -12,6 +12,7 @@ TARGET_LINK_LIBRARIES(pHandleSensorData
    MOOSGen
    geometry
    mbutil
+   contacts
    m
    pthread)
 
