@@ -563,7 +563,12 @@ void HandleSensorData::generateHazardReport() {
   string out = set.getSpec();
   m_Comms.Notify("HAZARD_REPORT", out );
 
-  printHumanHazardFile(finalmap);
+  ofstream s1;
+  s1.open("HazardReportFormatted.txt");
+  s1 << out << endl;
+  s1.close();
+
+  printHumanHazardFile(finalmap,"finalHazard.txt");
 }
 
 void HandleSensorData::installSensor(int width, double pd) {
@@ -722,6 +727,6 @@ void HandleSensorData::RegisterVariables()
   m_Comms.Register("HANDLE_SENSOR_MESSAGE", 0);
   //  }
   m_Comms.Register("NODE_REPORT_LOCAL", 0);
-  m_Comms.Register("DEPLOY",0);
+  m_Comms.Register("DEPLOY", 0);
 }
 

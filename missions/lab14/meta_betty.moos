@@ -27,7 +27,7 @@ Processconfig = ANTLER
   Run = uTimerScript     @ NewConsole = false ~ uTimerScript_SensorConfig
 //  Run = uXMS             @ NewConsole = true
   Run = pHandleSensorData @ NewConsole = true
-  Run = pFollowOrders	   @ NewConsole = true ~ slave
+//  Run = pFollowOrders	   @ NewConsole = true ~ slave
 }
 
 #include "plug_uXMS.moos"
@@ -46,7 +46,7 @@ ProcessConfig = pHandleSensorData
   VEHICLE_NAME = $(VNAME)
   SET_PRIMARY = FALSE
   CLASSIFY_MIN_TIME = 30.0
-  HAZARD_REPORT_TIME = 3000.0
+  HAZARD_REPORT_TIME = 8900.0
 }
 
 //------------------------------------------

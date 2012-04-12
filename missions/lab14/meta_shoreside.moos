@@ -22,9 +22,29 @@ Processconfig = ANTLER
   Run = uFldNodeComms     @ NewConsole = false
   Run = uFldHazardSensor  @ NewConsole = false
   Run = uXMS              @ NewConsole = true
+  Run = uFldHazardMetric  @ NewConsole = true
+  
 }
 
 #include plug_pHostInfo.moos
+
+//--------------------------------------------------
+// uFldHazardMetric Configuration Block
+
+ProcessConfig = uFldHazardMetric
+{
+  AppTick       = 1
+  CommsTick     = 1
+
+  hazard_file   = hazards_comp_one.txt
+
+  score_hazard_right =  10    // default
+  score_hazard_wrong = -50    // default
+  score_benign_right =   0    // default
+  score_benign_wrong =   0    // default
+  score_hazard_zilch = -25    // default
+  score_benign_zilch =   0    // default
+} 
 
 ProcessConfig = uXMS
 {
@@ -59,7 +79,7 @@ ProcessConfig = uFldHazardSensor
   classify_period = 30
 
 //  hazard_file   = hazards_default.txt
-  hazard_file   = hazards_set1.txt
+  hazard_file   = hazards_comp_one.txt
   verbose       = false
 }
 
