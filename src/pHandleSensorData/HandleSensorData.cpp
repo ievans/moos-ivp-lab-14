@@ -515,10 +515,6 @@ bool HandleSensorData::Iterate()
     m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
     _msg_idx++;
 
-
-    // Publish new map to coordinator
-    // publishFuseComplete();
-
     // reset iteration counter
     _iter_count = 0;
 
