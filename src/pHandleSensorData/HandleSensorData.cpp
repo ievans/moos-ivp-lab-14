@@ -281,6 +281,7 @@ void HandleSensorData::publishFuseComplete() {
   string out = newmap.toString();
   newmap.fromString(out);
   m_Comms.Notify("FUSE_COMPLETE", out);
+  cout << "FUSE message sent " << endl;;
 }
 
 void HandleSensorData::classifyUuos() {

@@ -74,6 +74,7 @@ bool FollowOrders::OnNewMail(MOOSMSG_LIST &NewMail)
 
       if (msg.GetKey() == SLAVE_ORDERS_STRING || msg.GetKey() == MASTER_ORDERS_STRING) {
 	  string order = msg.GetString();
+	  cout << "processing order << " << order << endl;
 	  this->processOrderString(order);
       }
       else if (msg.GetKey() == "NAV_X") {

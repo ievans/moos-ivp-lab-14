@@ -140,7 +140,7 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
    for(p=NewMail.begin(); p!=NewMail.end(); p++) {
       CMOOSMsg &msg = *p;
 
-      if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME || msg.GetKey() == "HANDLE_SENSOR_MESSAGE") {
+      if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME) {
 	  string mapString = msg.GetString();
 	  cout << " got MAP " << mapString << endl;
 	  myMap = MarkerMap(mapString);
