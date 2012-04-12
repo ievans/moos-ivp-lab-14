@@ -228,7 +228,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
        if(!new_node_record.valid()) {
 	 cout << "NodeRecord error " << endl;
        }
-       cout << "new_node_record: " << new_node_record.getSpec() << endl;
+       //cout << "new_node_record: " << new_node_record.getSpec() << endl;
 
        _node_record = new_node_record;
      }
@@ -335,34 +335,14 @@ void HandleSensorData::runNegativeDetector() {
     bool new_report = updateVehicleHazardStatus(hlabel);  // detection dice
     if(new_report) {
       _last_time_in_box[p->first] = MOOSTime();
-
-      // // temp hack
-      // if (p->first == 80 && tempcount < 40) {
-        cout << "new report = " << new_report << endl;
-        cout << "_last_time_in_box = " << _last_time_in_box[p->first] << endl;
-        cout << "_last_detect = " << _last_detect[p->first] << endl;
-        cout << "MoosTime = " << MOOSTime() << endl;
-        cout << "if1 = " << (_last_time_in_box[p->first] - _last_detect[p->first]) << endl;
-        cout << "if2 = " << (MOOSTime() -  _last_time_in_box[p->first]) << endl;
-      // }
     }
 
     if (_last_time_in_box[p->first] - _last_detect[p->first] > 1.0 &&
 	MOOSTime() -  _last_time_in_box[p->first] > 1.0) {
       // We missed it
-
-      cout << p->first << " got into negativeDetect" << endl;
-	cout << "new report = " << new_report << endl;
-	cout << "_last_time_in_box = " << _last_time_in_box[p->first] << endl;
-	cout << "_last_detect = " << _last_detect[p->first] << endl;
-	cout << "MoosTime = " << MOOSTime() << endl;
-	cout << "if1 = " << (_last_time_in_box[p->first] - _last_detect[p->first]) << endl;
-	cout << "if2 = " << (MOOSTime() -  _last_time_in_box[p->first]) << endl;
-
       negativeDetect(p->first);
       _last_detect[p->first] = _last_time_in_box[p->first];
     }
-
   }
 }
 
@@ -507,12 +487,6 @@ bool HandleSensorData::Iterate()
 {	
   //  cout << "Iterate Start" << endl;
 
-  // temp hack
-  if (_localMap._map.find(80) != _localMap._map.end() && tempcount < 40){
-    //    cout << "80: " << _last_in_box[80] << endl;
-    tempcount++;
-  }
-
   // run classify subroutine.  Handles time internally
   classifyUuos();
   runNegativeDetector();
@@ -527,23 +501,10 @@ bool HandleSensorData::Iterate()
       m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
     _msg_idx++;
 
-    // stringstream msg2;
-    //msg2 << "src_node=" << tolower(_vehicle_name) 
-    //	<< ",dest_node=all,var_name=TEST_MESSAGE,string_val=highThere!";
-    //m_Comms.Notify("NODE_MESSAGE_LOCAL", msg2.str() );
-    //    cout << "Trying to publish " << printStateMessage() << endl;
-
-    // Post local copy
-    //    m_Comms.Notify("LOCAL_SENSOR_MESSAGE", printStateMessage());
-
     // reset iteration counter
     _iter_count = 0;
 
     //    cout << "Mission Time: " << MOOSTime() - _starttime << endl;
-    //    cout << "_isPrimary = " << _isPrimary << endl;
-    //    cout << "_lockout = " << _lockout << endl;
-    //    cout << "Timing: " << MOOSTime() << " - " << _starttime
-    //	 << " <> " << _endtime << endl;
   }
 
   if ( (int)(floor(MOOSTime() - _starttime)) % 200 == 0) {
@@ -678,7 +639,6 @@ bool HandleSensorData::OnStartUp()
   _classifyTime = _starttime;
   _endtime = 8500.0;
   _classify_min_time = 30.0;
-  tempcount = 0;
 
   // Default sensor settings
   installSensor(50,0.9); // Widest sensor, sensible Pd
