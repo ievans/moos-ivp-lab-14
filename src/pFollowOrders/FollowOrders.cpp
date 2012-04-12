@@ -24,6 +24,7 @@ FollowOrders::~FollowOrders()
 {
 }
 
+#define MASTER_ORDERS_STRING "READ_MASTER_ORDERS"
 #define SLAVE_ORDERS_STRING "READ_ORDERS"
 #define WAYPOINTS_UPDATE_NAME "UP_WPT_PTS"
 #define BEHAVIOR_UPDATE_NAME "COORDMODE"
@@ -71,9 +72,16 @@ bool FollowOrders::OnNewMail(MOOSMSG_LIST &NewMail)
    for(p=NewMail.begin(); p!=NewMail.end(); p++) {
       CMOOSMsg &msg = *p;
 
-      if (msg.GetKey() == SLAVE_ORDERS_STRING) {
+      if (msg.GetKey() == SLAVE_ORDERS_STRING || msg.GetKey() == MASTER_ORDERS_STRING) {
 	  string order = msg.GetString();
+	  cout << "processing order << " << order << endl;
 	  this->processOrderString(order);
+      }
+      else if (msg.GetKey() == "NAV_X") {
+          m_Comms.Notify("SLAVE_X", msg.GetDouble());
+      }
+      else if (msg.GetKey() == "NAV_Y") {
+          m_Comms.Notify("SLAVE_Y", msg.GetDouble());
       }
 
    }
@@ -90,7 +98,8 @@ bool FollowOrders::OnConnectToServer()
    // possibly look at the mission file?
    // m_MissionReader.GetConfigurationParam("Name", <string>);
    // m_Comms.Register("VARNAME", 0);
-	
+    m_Comms.Notify("SLAVE_SENSOR_RANGE", 25); // TODO PUT ACTUAL SENSOR RANGE
+
    RegisterVariables();
    return(true);
 }
@@ -121,6 +130,13 @@ bool FollowOrders::OnStartUp()
 
 void FollowOrders::RegisterVariables()
 {
-    m_Comms.Register(SLAVE_ORDERS_STRING, 0);
+    if (GetAppName() == "slave")
+	m_Comms.Register(SLAVE_ORDERS_STRING, 0);
+    else
+	m_Comms.Register(MASTER_ORDERS_STRING, 0);
+
+    m_Comms.Register("NAV_X", 0);
+    m_Comms.Register("NAV_Y", 0);
+
 }
 

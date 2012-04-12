@@ -25,11 +25,11 @@ Processconfig = ANTLER
   Run = uTimerScript     @ NewConsole = false
   Run = uTimerScript     @ NewConsole = false ~ uTimerScript_SensorConfig
   Run = uFldNodeBroker   @ NewConsole = false
-  Run = pHandleSensorData @ NewConsole = true
-  Run = uXMS             @ NewConsole = true
+  Run = pHandleSensorData @ NewConsole = false
+//  Run = uXMS             @ NewConsole = true
   Run = uFldMessageHandler @ NewConsole = false
   Run = pCoordinator	   @ NewConsole = true
-  Run = pFollowOrders	   @ NewConsole = true
+  Run = pFollowOrders	   @ NewConsole = true ~ master
 }
 
 #include "plug_pHandleSensorData.moos"

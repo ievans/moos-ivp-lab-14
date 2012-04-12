@@ -28,6 +28,7 @@
 #define GS_INITIAL 0
 #define GS_ALL_LAWNMOW 1
 #define GS_LAWNMOW_AND_INSPECT 2
+#define GS_RENDEZVOUS 3
 
 class Coordinator : public CMOOSApp
 {
@@ -52,6 +53,10 @@ private:
    int gameState;
    double startMOOSTime;
    MarkerMap myMap;
+   Point2D slavePose; // we abuse this and store the slave's sensor radius on the id field
+   Point2D myPose;
+   double rendezvousTime;
+   WaypointOrder rendezvous;
 };
 
 #endif 

@@ -2,6 +2,7 @@
 #define UUO_HEADER
 
 #include <queue>
+#include "Point2D.h"
 
 #define PRIOR_PROB 0.10
 #define PRIORITY_MAX .294 // chosen by expected score decision line
@@ -27,6 +28,18 @@ public:
 	// default initialization
 	probHazard = PRIOR_PROB; // Maximum entropy?  Better prior?
 	classifyCount = 0;
+    }
+
+    // for testing
+    Uuo (int id, double x, double y, double probHazard) {
+	this->id = id; 
+	this->x = x; 
+	this->y = y; 
+	this->probHazard = probHazard;
+    }
+
+    Point2D getPoint() {
+	return Point2D(this->x, this->y, this->id);
     }
 
     bool isHazard() {
@@ -65,6 +78,12 @@ public:
       else {
 	return false;
       }
+    }
+
+    string toString() {
+	stringstream s;
+	s << "x=" << x << ",y=" << y << ",id=" << id << ",probHazard=" << probHazard;
+	return s.str();
     }
 };
 
