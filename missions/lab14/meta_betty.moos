@@ -21,7 +21,7 @@ Processconfig = ANTLER
   Run = pNodeReporter    @ NewConsole = false
   Run = pMarinePID       @ NewConsole = false
   Run = pHelmIvP         @ NewConsole = false
-  Run = uFldNodeBroker   @ NewConsole = false
+  Run = uFldNodeBroker   @ NewConsole = true
   Run = uFldMessageHandler @ NewConsole = false
   Run = uTimerScript     @ NewConsole = false
   Run = uTimerScript     @ NewConsole = false ~ uTimerScript_SensorConfig

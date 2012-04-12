@@ -6,4 +6,4 @@ bin/*
 targ*
 
 # Generated Files
-missions/lab14/HazardOutput.txt
+missions/lab14/*.txt

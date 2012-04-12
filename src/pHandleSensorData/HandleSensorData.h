@@ -44,6 +44,7 @@ private:
    void installSensor(int,double,double,double);
    MarkerMap fuseMaps();
    void printHumanHazardFile(MarkerMap&);
+   void printHumanHazardFile(MarkerMap&, string);
    void publishFuseComplete();
 
    string _vehicle_name;

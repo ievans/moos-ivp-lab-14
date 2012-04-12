@@ -24,13 +24,13 @@ public:
 	// TODO:  Compress later
 	// Message format:
 	// : separated
-	// id,xpos,ypos,pH,cc
+	// id,xpos,ypos,pH,cc,mh
 
 	stringstream msg;
 	map<int, Uuo>::iterator it;
 
 	if (_map.begin() == _map.end()) {
-	    msg << "";
+	    msg << "NONE";
 	}
 	else {
 	    it = _map.begin();
@@ -38,14 +38,16 @@ public:
 		<< "x=" << it->second.x << "," 
 		<< "y=" << it->second.y << ","
 		<< "pH=" << it->second.probHazard << "," 
-		<< "cc=" << it->second.classifyCount;
+		<< "cc=" << it->second.classifyCount << ","
+		<< "mh=" << it->second.m_hist;
 
 	    for (it++; it != _map.end(); it++) {
 		msg << ":" << "id=" << it->second.id << "," 
 		    << "x=" << it->second.x << "," 
 		    << "y=" << it->second.y << ","
 		    << "pH=" << it->second.probHazard << "," 
-		    << "cc=" << it->second.classifyCount;
+		    << "cc=" << it->second.classifyCount << ","
+		    << "mh=" << it->second.m_hist;
 	    }
 	}
 
@@ -55,6 +57,9 @@ public:
     void fromString(string encodedMM) {
       // WARNING!  THIS WILL OVERWRITE EXISTING MAP!
       _map.clear();
+      if (encodedMM == "NONE") {
+	return;
+      }
       map<int,Uuo>::iterator it;
       vector<string> strvect = parseString(encodedMM,":");
       for (int i = 0; i < strvect.size(); i++) {
@@ -79,14 +84,18 @@ public:
 		else if(var[0] == "cc") {
 		    newMine.classifyCount = atoi(var[1].c_str());
 		}
+		else if (var[0] == "mh") {
+		  newMine.m_hist = var[1];
+		}
 	    }
 
 	    if (newMine.isInitialized()) {
-		    _map.insert( pair<int,Uuo>(newMine.id,newMine) );
+	      _map.insert( pair<int,Uuo>(newMine.id,newMine) );
 	    }
 	    else {
 		cout << "Invalid mine message received:" << endl;
 		cout << encodedMM << endl;
+		return;
 	    }
 	}
     };

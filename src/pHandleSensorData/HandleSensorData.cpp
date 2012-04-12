@@ -92,11 +92,11 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 	 double haz = it->second.probHazard;
 	 if (hazard) {
 	   it->second.probHazard = (_Pc*haz) / (_Pc*haz + (1-_Pc)*(1-haz));
-	   it->second.m_hist = it->second.m_hist + "+";
+	   it->second.m_hist = it->second.m_hist + "x";
 	 }
 	 else {
 	   it->second.probHazard = ( (1-_Pc)*haz ) / ( (1-_Pc)*haz + _Pc*(1-haz) );
-	   it->second.m_hist = it->second.m_hist + "-";
+	   it->second.m_hist = it->second.m_hist + "o";
 	 }
 
 	 //m_Comms.Notify("LOCAL_SENSOR_MESSAGE", printStateMessage());
@@ -122,7 +122,7 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 
      }
      else if (key == "HANDLE_SENSOR_MESSAGE") {
-       cout << "Got Message from other vehicle" << endl;
+       //      cout << "Got Message from other vehicle" << endl;
        parseStateMessage(msg.GetString());
      }
 
@@ -222,11 +222,11 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
 }
 
 void HandleSensorData::parseStateMessage(string msg) {
+  cout << "Parsing: " << endl;
+  cout << msg << endl;
     _otherMap.fromString(msg);
 }
 
-// does a bayesian fusion on this vehicle's map and the other vehicle's
-// map copy stored int _map._mines_other
 MarkerMap HandleSensorData::fuseMaps() {
   // Ask Rob to type up the bayes math.
 
@@ -294,12 +294,28 @@ string HandleSensorData::printStateMessage() {
   return _localMap.toString();
 }
 
-void HandleSensorData::printHumanHazardFile(MarkerMap& map) {
+void HandleSensorData::printHumanHazardFile(MarkerMap& inmap) {
   std::map<int, Uuo>::iterator it;
   ofstream outfile;
-  outfile.open("HazardOutput.txt");
-  for (it = map._map.begin(); it != map._map.end(); it++) {
-    outfile << "[" << it->second.id << "] = " << it->second.probHazard 
+  string filename = "HazardOutput" + _vehicle_name + ".txt";
+  outfile.open(filename.c_str());
+  for (it = inmap._map.begin(); it != inmap._map.end(); it++) {
+    outfile << "[" << it->second.id << "] = " 
+	    << setprecision(4) << fixed << it->second.probHazard 
+	    << "\t" << it->second.isHazard() << "\t" 
+	    << it->second.m_hist << endl;
+  }
+  outfile.close();
+  return;
+}
+
+void HandleSensorData::printHumanHazardFile(MarkerMap& inmap, string filename) {
+  std::map<int, Uuo>::iterator it;
+  ofstream outfile;
+  outfile.open(filename.c_str());
+  for (it = inmap._map.begin(); it != inmap._map.end(); it++) {
+    outfile << "[" << it->second.id << "] = " 
+	    << setprecision(4) << fixed << it->second.probHazard 
 	    << "\t" << it->second.isHazard() << "\t" 
 	    << it->second.m_hist << endl;
   }
@@ -321,10 +337,16 @@ bool HandleSensorData::Iterate()
     // Constantly send state messages to other vehicle
     stringstream msg;
     msg << "src_node=" << tolower(_vehicle_name) 
-	<< ",dest_node=all,var_name=HANDLE_SENSOR_MESSAGE,string_val=\"" 
-	<< printStateMessage() << "\"";
-        m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
+    	<< ",dest_node=all,var_name=HANDLE_SENSOR_MESSAGE,string_val=\"" 
+      	<< printStateMessage() << "\"";
+      //	<< "" << _msg_idx;
+      m_Comms.Notify("NODE_MESSAGE_LOCAL", msg.str() );
     _msg_idx++;
+
+    // stringstream msg2;
+    //msg2 << "src_node=" << tolower(_vehicle_name) 
+    //	<< ",dest_node=all,var_name=TEST_MESSAGE,string_val=highThere!";
+    //m_Comms.Notify("NODE_MESSAGE_LOCAL", msg2.str() );
     //    cout << "Trying to publish " << printStateMessage() << endl;
 
     // Post local copy
@@ -341,6 +363,10 @@ bool HandleSensorData::Iterate()
 
     MarkerMap newmap = fuseMaps();
     printHumanHazardFile(newmap);
+    string str = _vehicle_name + "localMap.txt";
+    printHumanHazardFile(_localMap, str);
+    str = _vehicle_name + "otherMap.txt";
+    printHumanHazardFile(_otherMap, str);
   }
 
   if (_isPrimary && !_lockout && MOOSTime() - _starttime > _endtime) {
