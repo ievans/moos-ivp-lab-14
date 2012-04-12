@@ -70,11 +70,21 @@ void Coordinator::stateTransition(int newState) {
 	// generate waypoint orders for the slave
 	vector<WaypointOrder> wps;
 
+	if (myMap._map.size() == 0) {
+	    cout << "WARNING: Time to transition to LAWNMOW_AND_INSPECT, but no map data "  << endl;
+	    return; // state will be left unchanged
+	}
+
 	// go to the most valuable UUOs
 	// note: hack, slavePose.id = the sensor radius of the slave vehicle
 	priority_queue<PriorityNode> pq = myMap.getPriorityNodes(slavePose, slavePose.id);
-	for (int i = 0; i < MIN(MAX_VISIT, pq.size()); i++) {
+	int minePops = MAX_VISIT;
+	if (pq.size() < MAX_VISIT)
+	    minePops = pq.size();
+
+	for (int i = 0; i < minePops; i++) {
 	    PriorityNode mine = pq.top();
+	    cout << "popped mine weight " << mine.getWeight() << endl;
 	    pq.pop();
 	    
             // create an order to go to this mine
@@ -85,7 +95,9 @@ void Coordinator::stateTransition(int newState) {
 	// (TODO) meet back up where the master will be in the *future*
 	rendezvous.waypoint = myPose;
 	// optimally sort the waypoint orders
+	cout << "beginning TSP..." << endl;
 	wps = WaypointOrder::optimalPath(wps, slavePose, rendezvous.waypoint);
+	cout << "TSP complete." << endl;
 	// give slave final waypoint, it's the rendezvous
 	wps.push_back(rendezvous);
 	// set a time to meet
@@ -128,9 +140,9 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
    for(p=NewMail.begin(); p!=NewMail.end(); p++) {
       CMOOSMsg &msg = *p;
 
-      if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME) {
+      if (msg.GetKey() == FUSE_COMPLETE_MESSAGE_NAME || msg.GetKey() == "HANDLE_SENSOR_MESSAGE") {
 	  string mapString = msg.GetString();
-	  cout << " got MAP " << mapString << endl;
+	  //cout << " got MAP " << mapString << endl;
 	  myMap = MarkerMap(mapString);
 	  // if we were planning on having a rendezvous...it just happened
 	  this->stateTransition(GS_LAWNMOW_AND_INSPECT);
@@ -155,6 +167,9 @@ bool Coordinator::OnNewMail(MOOSMSG_LIST &NewMail)
       }
       else if (msg.GetKey() == "SLAVE_SENSOR_RANGE") {
           slavePose.id = msg.GetDouble();
+      }
+      else {
+	  cout << "unknown message: " << msg.GetKey() << " : " << msg.GetString() << endl;
       }
    }
 	
@@ -279,6 +294,13 @@ void Coordinator::TestAll() {
 
     // should !=, because ID of Uuo didn't match inserted ID
     assert(m2._map[3282].toString() != d.toString());
+    cout << "ok" << endl;
+
+    cout << "Testing MarkerMap PriorityQueue...";
+    MarkerMap m3 = MarkerMap("id=1,x=-10,y=-88,pH=0.0261963,cc=0,mh=.o:id=10,x=-88,y=-79,pH=0.0261963,cc=0,mh=.o:id=20,x=33,y=-145,pH=0.1,cc=1,mh=.:id=31,x=187,y=-104,pH=0.0261963,cc=0,mh=.o:id=38,x=362,y=-77,pH=0.0261963,cc=0,mh=.o:id=76,x=96,y=-116,pH=0.132275,cc=0,mh=.:id=84,x=-40,y=-81,pH=0.0261963,cc=0,mh=.o:id=95,x=383,y=-87,pH=0.463468,cc=0,mh=.x:id=144,x=338,y=-143,pH=0.0261963,cc=0,mh=.o:id=202,x=143,y=-122,pH=0.132275,cc=1,mh=.:id=204,x=282,y=-104,pH=0.0261963,cc=0,mh=.o:id=232,x=22,y=-86,pH=0.0261963,cc=0,mh=.o:id=245,x=382,y=-132,pH=0.0261963,cc=0,mh=.o:id=292,x=253,y=-148,pH=0.0261963,cc=0,mh=.o:id=322,x=70,y=-98,pH=0.463468,cc=0,mh=.x:id=362,x=287,y=-130,pH=0.132275,cc=1,mh=.:id=398,x=253,y=-76,pH=0.0261963,cc=0,mh=.o:id=424,x=341,y=-91,pH=0.132275,cc=1,mh=.:id=426,x=-51,y=-85,pH=0.132275,cc=1,mh=.:id=429,x=58,y=-140,pH=0.132275,cc=1,mh=.:id=449,x=327,y=-128,pH=0.132275,cc=1,mh=.:id=505,x=391,y=-155,pH=0.132275,cc=1,mh=.:id=510,x=52,y=-121,pH=0.132275,cc=1,mh=.:id=539,x=346,y=-106,pH=0.132275,cc=1,mh=.:id=553,x=212,y=-88,pH=0.132275,cc=1,mh=.:id=558,x=293,y=-139,pH=0.132275,cc=1,mh=.:id=575,x=362,y=-87,pH=0.132275,cc=1,mh=.:id=625,x=183,y=-123,pH=0.132275,cc=1,mh=.:id=626,x=392,y=-96,pH=0.132275,cc=1,mh=.:id=643,x=-131,y=-102,pH=0.0261963,cc=0,mh=.o:id=661,x=227,y=-109,pH=0.132275,cc=1,mh=.:id=672,x=-132,y=-93,pH=0.0261963,cc=0,mh=.o:id=684,x=389,y=-90,pH=0.132275,cc=1,mh=.:id=685,x=59,y=-138,pH=0.132275,cc=1,mh=.:id=727,x=-23,y=-92,pH=0.132275,cc=1,mh=.:id=738,x=-144,y=-84,pH=0.132275,cc=1,mh=.:id=744,x=277,y=-110,pH=0.132275,cc=1,mh=.:id=755,x=280,y=-81,pH=0.132275,cc=1,mh=.:id=767,x=329,y=-80,pH=0.132275,cc=1,mh=.:id=778,x=-135,y=-92,pH=0.0261963,cc=0,mh=.o:id=787,x=301,y=-132,pH=0.132275,cc=1,mh=.:id=794,x=40,y=-84,pH=0.132275,cc=1,mh=.:id=829,x=391,y=-93,pH=0.132275,cc=1,mh=.:id=836,x=302,y=-113,pH=0.132275,cc=1,mh=.:id=847,x=252,y=-90,pH=0.132275,cc=1,mh=.:id=850,x=-108,y=-88,pH=0.132275,cc=1,mh=.:id=918,x=245,y=-146,pH=0.132275,cc=1,mh=.:id=929,x=321,y=-102,pH=0.132275,cc=1,mh=.:id=930,x=92,y=-105,pH=0.132275,cc=1,mh=.:id=968,x=276,y=-75,pH=0.132275,cc=1,mh=.:id=970,x=42,y=-123,pH=0.132275,cc=1,mh=.:id=8888,x=0,y=-20,pH=0.0261963,cc=0,mh=.o");
+    priority_queue<PriorityNode> pq = m3.getPriorityNodes(slavePose, slavePose.id);
+    cout << "pq.size(): " << pq.size() << endl;
+    PriorityNode pn1 = pq.top();
     cout << "ok" << endl;
 
     cout << "Testing TSP...";

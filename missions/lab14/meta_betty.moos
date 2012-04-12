@@ -25,9 +25,9 @@ Processconfig = ANTLER
   Run = uFldMessageHandler @ NewConsole = false
   Run = uTimerScript     @ NewConsole = false
   Run = uTimerScript     @ NewConsole = false ~ uTimerScript_SensorConfig
-  Run = uXMS             @ NewConsole = true
+//  Run = uXMS             @ NewConsole = true
   Run = pHandleSensorData @ NewConsole = true
-  Run = pFollowOrders	   @ NewConsole = true
+  Run = pFollowOrders	   @ NewConsole = true ~ slave
 }
 
 #include "plug_uXMS.moos"

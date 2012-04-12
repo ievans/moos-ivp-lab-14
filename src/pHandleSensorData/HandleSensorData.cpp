@@ -42,12 +42,9 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
      //     cout << "Got Mail : " << msg.GetKey() << endl;
 
      // This is a classification report
-     if (key == "UHZ_DETECTION_REPORT") {
+     if (key == "UHZ_HAZARD_REPORT") {
        // Parse String
        string str = msg.GetString();
-
-       cout << "UHZ_DETECTION_REPORT is " << str << endl;
-
        vector<string> strv = parseString(str,",");
 
        double x,y;
@@ -130,13 +127,10 @@ bool HandleSensorData::OnNewMail(MOOSMSG_LIST &NewMail)
        parseStateMessage(msg.GetString());
      }
 
-     else if (key == "UHZ_HAZARD_REPORT") {
+     else if (key == "UHZ_DETECTION_REPORT") {
 	 
        // Parse String
        string str = msg.GetString();
-
-       cout << "UHZ_HAZARD_REPORT is " << str << endl;
-
        vector<string> strv = parseString(str,",");
 
        double x,y;
@@ -285,8 +279,8 @@ MarkerMap HandleSensorData::fuseLocalData() {
 void HandleSensorData::publishFuseComplete() {
   MarkerMap newmap = fuseMaps();
   string out = newmap.toString();
+  newmap.fromString(out);
   m_Comms.Notify("FUSE_COMPLETE", out);
-  cout << "fused" << endl;
 }
 
 void HandleSensorData::classifyUuos() {

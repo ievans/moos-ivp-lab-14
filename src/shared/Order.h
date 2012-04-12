@@ -40,7 +40,7 @@ public:
 class WaypointOrder : public Order {
 public:
     Point2D waypoint;
-    WaypointOrder() {};
+    WaypointOrder() { type = OrderType::WAYPOINT_ORDER; };
     WaypointOrder(Point2D w) { type = OrderType::WAYPOINT_ORDER; waypoint = w; };
 
     string toString() { 
@@ -82,7 +82,7 @@ public:
 		minPath = wps;
 	    }
 	} while (next_permutation(wps.begin(), wps.end()));
-	cout << "TSP iterations: " << c;
+	cout << "TSP iterations: " << c << endl;
 	return minPath;
     };
 
