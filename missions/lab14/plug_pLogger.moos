@@ -15,8 +15,19 @@ ProcessConfig = pLogger
   Log = IVPHELM_LIFE_EVENT @ 0 nosync
 
   // Log it all!!!!!
-  WildCardLogging = true 
-  WildCardOmitPattern = *_STATUS
+//  WildCardLogging = true
+//  WildCardOmitPattern = *_STATUS
   LogAuxSrc = true
   LoggingDirectorySummaryFile = ~/.pLogger_%(VNAME)
+
+  Log = HANDLE_SENSOR_MESSAGE @ 0
+  Log = UHZ_HAZARD_REPORT @ 0
+  Log = UHZ_DETECTION_REPORT @ 0
+  Log = UHZ_CONFIG_ACK @ 0
+  Log = NODE_REPORT_LOCAL @ 0
+  Log = DEPLOY @ 0
+  Log = HAZARD_REPORT @ 0
+  Log = FUSE_COMPLETE @ 0
+  Log = NEGATIVE_DETECT @ 0
+
 }

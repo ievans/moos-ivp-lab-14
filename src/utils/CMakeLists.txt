@@ -14,11 +14,7 @@ INCLUDE_DIRECTORIES(${LOCAL_LIBRARY_DIRS})
 #============================================================================
 # List the subdirectories to build...
 #============================================================================
-#ADD_SUBDIRECTORY(lib_behaviors-test)
-ADD_SUBDIRECTORY(pHandleSensorData)
-ADD_SUBDIRECTORY(pCoordinator)
-ADD_SUBDIRECTORY(pFollowOrders)
-ADD_SUBDIRECTORY(utils)
+ADD_SUBDIRECTORY(histToMatlab)
 
 ##############################################################################
 #                           END of CMakeLists.txt
