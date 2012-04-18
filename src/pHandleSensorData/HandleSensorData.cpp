@@ -258,6 +258,9 @@ void HandleSensorData::negativeDetect(int id) {
   double haz = it->second.probHazard;
   it->second.probHazard = ((1-_Pd)*haz) / ((1-_Pd)*haz + (1-_Pfa)*(1-haz));
   it->second.m_hist = it->second.m_hist + "^";
+  stringstream s;
+  s << "label=" << id;
+  m_Comms.Notify("NEGATIVE_DETECT",s.str());
 }
 
 //------------------------------------------------------------
@@ -301,7 +304,7 @@ bool HandleSensorData::updateNodePolygon()
   double hdg   = _node_record.getHeading();
   string vname = _node_record.getName();
 
-  double swath_width = _width;
+  double swath_width = _width-1;
 
   double phi, hypot;
   calcSwathGeometry(swath_width, phi, hypot);
@@ -351,8 +354,8 @@ void HandleSensorData::runNegativeDetector() {
       _last_time_in_box[p->first] = MOOSTime();
     }
 
-    if (_last_time_in_box[p->first] - _last_detect[p->first] > 1.0 &&
-	MOOSTime() -  _last_time_in_box[p->first] > 1.0) {
+    if (_last_time_in_box[p->first] - _last_detect[p->first] > 3.0 &&
+	MOOSTime() -  _last_time_in_box[p->first] > 3.0) {
       // We missed it
       negativeDetect(p->first);
       _last_detect[p->first] = _last_time_in_box[p->first];
@@ -503,7 +506,7 @@ bool HandleSensorData::Iterate()
 
   // run classify subroutine.  Handles time internally
   classifyUuos();
-//  runNegativeDetector();
+  runNegativeDetector();
 
   if (_iter_count == 20) {
     // Constantly send state messages to other vehicle

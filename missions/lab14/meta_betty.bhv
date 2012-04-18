@@ -37,6 +37,7 @@ Behavior = BHV_Waypoint
   //points = format=lawnmower, label=initSweep, x=0, y=-30, height=60, width=10, lane_width=10, rows=north-south, degs=0
 
 // Full area lawnmow
+//  points = format=lawnmower, label=initSweep, x=125, y=-237.5, height=325, width=550, lane_width=50, rows=east-west, degs=0
   points = format=lawnmower, label=initSweep, x=125, y=-237.5, height=325, width=550, lane_width=50, rows=east-west, degs=0
 
   repeat = 0
