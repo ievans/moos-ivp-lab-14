@@ -41,8 +41,8 @@ ProcessConfig = uFldHazardMetric
   score_hazard_right =  10    // default
   score_hazard_wrong = -50    // default
   score_benign_right =   0    // default
-  score_benign_wrong =   0    // default
-  score_hazard_zilch = -25    // default
+  score_benign_wrong = -25    // default
+  score_hazard_zilch = -50    // default
   score_benign_zilch =   0    // default
 } 
 

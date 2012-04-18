@@ -4,6 +4,7 @@ build/*
 bin/*
 .#*
 targ*
+latex/
 
 # Generated Files
 missions/lab14/*.txt
